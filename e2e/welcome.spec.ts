@@ -1,9 +1,10 @@
 import { expect, test } from "@playwright/test";
+import { isActionableBrowserIssue } from "../src/test/browserConsole";
 
 test("a visitor can paint a textured surface selection", async ({ page }) => {
   const browserIssues: string[] = [];
   page.on("console", (message) => {
-    if (["error", "warning"].includes(message.type()))
+    if (isActionableBrowserIssue(message.type(), message.text()))
       browserIssues.push(`${message.type()}: ${message.text()}`);
   });
   page.on("pageerror", (error) =>
