@@ -11,7 +11,7 @@ describe("validateModelFile", () => {
     expect(validateModelFile(new File(["data"], "sample.3mf")).valid).toBe(
       false,
     );
-    expect(validateModelFile(new File([], "empty.obj"))).toMatchObject({
+    expect(validateModelFile(new File([], "empty.stl"))).toMatchObject({
       valid: false,
       message: "This model file is empty.",
     });

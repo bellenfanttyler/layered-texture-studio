@@ -6,7 +6,7 @@ export interface FeatureFlags {
   meshRepair: boolean;
   sampleProjects: boolean;
   helpLinks: boolean;
-  importFormats: readonly ["stl", "obj", "glb", "gltf"];
+  importFormats: readonly "stl"[];
 }
 
 export const features: FeatureFlags = {
@@ -17,5 +17,5 @@ export const features: FeatureFlags = {
   meshRepair: false,
   sampleProjects: true,
   helpLinks: true,
-  importFormats: ["stl", "obj", "glb", "gltf"],
+  importFormats: ["stl"],
 };

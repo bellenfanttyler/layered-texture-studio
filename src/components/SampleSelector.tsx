@@ -2,6 +2,7 @@ import { Box, Check, Circle, Disc3, Layers3 } from "lucide-react";
 import { useWelcomeStore } from "../app/store";
 import { copy } from "../config/copy";
 import { sampleModels, sampleTextures } from "../config/sampleAssets";
+import { importSampleModel } from "../mesh/modelImportController";
 
 const modelIcons = {
   cube: Box,
@@ -27,7 +28,7 @@ export function SampleSelector() {
     <section className="sample-section" aria-labelledby="samples-heading">
       <div className="section-heading">
         <div>
-          <span className="section-kicker">Curated starting points</span>
+          <span className="section-kicker">{copy.welcome.sectionKicker}</span>
           <h2 id="samples-heading">{copy.welcome.sampleHeading}</h2>
         </div>
         <p>{copy.welcome.sampleSubheading}</p>
@@ -129,6 +130,17 @@ export function SampleSelector() {
             </small>
           )}
         </span>
+        {selectedModel && (
+          <button
+            className="button button--primary selection-summary__action"
+            type="button"
+            onClick={() =>
+              void importSampleModel(selectedModel, selectedTextureIds)
+            }
+          >
+            {copy.welcome.openSample}
+          </button>
+        )}
       </div>
     </section>
   );

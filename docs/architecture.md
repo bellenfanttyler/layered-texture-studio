@@ -1,8 +1,8 @@
 # Architecture
 
-## Current vertical slice
+## Current vertical slices
 
-The first slice ends at local or sample asset selection. Zustand stores only serializable UI metadata. Selected browser `File` objects live in a module registry outside React state, establishing the boundary that future model and texture managers will follow.
+The first slice covers local or sample asset selection. The second imports binary or ASCII STL data in a dedicated worker, transfers position and normal buffers to an immutable source-mesh manager, and renders a separate copied `BufferGeometry` in React Three Fiber. Zustand stores only serializable UI and model metadata; browser `File` objects and typed arrays remain outside React state.
 
 Configuration is split by concern:
 
@@ -24,4 +24,6 @@ Future mesh work must preserve these invariants:
 6. Three.js resources and BVH structures have explicit disposal ownership.
 7. Dexie persists source assets, masks, and project metadata locally; disposable previews are regenerated.
 
-The next complete slice should parse one supported model format in a worker, store its immutable buffers, render it in React Three Fiber, frame the camera, report basic diagnostics, and cleanly dispose it on replacement.
+The viewport disposes its copied geometry on unmount, and closing the workspace removes the source asset. Import cancellation terminates the parser worker.
+
+The next complete slice should build adjacency and BVH data in a worker, create the first independent per-vertex mask asset, and support one dependable visible-surface paint stroke with undo.

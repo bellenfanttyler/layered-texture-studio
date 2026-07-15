@@ -27,7 +27,7 @@
     "lucide-react": "^1.24.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "three": "^0.185.1",
+    "three": "^0.182.0",
     "three-mesh-bvh": "^0.9.11",
     "zustand": "^5.0.14"
   },
@@ -40,7 +40,7 @@
     "@types/node": "^26.1.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "@types/three": "^0.185.1",
+    "@types/three": "^0.182.0",
     "@vitejs/plugin-react": "^6.0.3",
     "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^10.7.0",

@@ -9,7 +9,7 @@ export const copy = {
     introduction:
       "Begin with your own mesh or pair a supplied model with one or more displacement maps. Your choices stay on this device.",
     dropTitle: "Drop a 3D model here",
-    dropHint: "or choose an STL, OBJ, GLB, or GLTF file",
+    dropHint: "or choose a binary or ASCII STL file",
     chooseFile: "Choose model file",
     selectedFile: "Local model selected",
     sampleHeading: "Start with a sample",
@@ -19,9 +19,39 @@ export const copy = {
     textureGroup: "Sample textures",
     selectionEmpty: "Select a model to begin your sample setup.",
     selectionReady: "Sample setup ready",
+    openSample: "Open sample model",
+    openLocal: "Open selected model",
     privacy: "Your files stay on this device. Nothing is uploaded.",
     initializationNote:
-      "This repository milestone prepares project selection and the application foundation. Mesh editing is not yet exposed.",
+      "STL viewing is available now. Surface painting, texture application, project saving, and geometry export remain hidden until those workflows are complete.",
+    compatibilityTitle: "WebGL 2 is unavailable.",
+    compatibilityDetail:
+      "Model preview requires a recent browser with hardware acceleration enabled.",
+    sectionKicker: "Curated starting points",
+    importErrorTitle: "That model could not be opened",
+  },
+  loading: {
+    title: "Preparing your model",
+    detail: "Geometry processing stays on this device.",
+    cancel: "Cancel import",
+    openingViewport: "Opening the private 3D viewport…",
+  },
+  workspace: {
+    back: "Choose another model",
+    sourceProtected: "Immutable source",
+    sourceDetail: "Preview geometry is rebuilt from a protected source copy.",
+    overview: "Mesh overview",
+    dimensions: "Dimensions",
+    triangles: "Triangles",
+    vertices: "Vertices",
+    format: "Format",
+    units: "Assumed units",
+    fileSize: "File size",
+    viewportHint: "Drag to orbit · Scroll to zoom · Right-drag to pan",
+    selectedMaps: "Selected maps",
+    selectedMapsDetail:
+      "These references are preserved for the upcoming layer workflow; they are not yet applied to the mesh.",
+    noMaps: "No texture maps selected.",
   },
   steps: [
     {

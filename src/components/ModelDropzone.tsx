@@ -3,6 +3,7 @@ import { CheckCircle2, FileBox, Upload } from "lucide-react";
 import { registerLocalModel } from "../assets/localFileRegistry";
 import { useWelcomeStore } from "../app/store";
 import { copy } from "../config/copy";
+import { importLocalModel } from "../mesh/modelImportController";
 import { formatBytes, validateModelFile } from "../utils/fileSelection";
 
 export function ModelDropzone() {
@@ -74,15 +75,27 @@ export function ModelDropzone() {
       <button
         className="button button--primary"
         type="button"
-        onClick={() => inputRef.current?.click()}
+        onClick={() => {
+          if (localModel) void importLocalModel(localModel);
+          else inputRef.current?.click();
+        }}
       >
-        {copy.welcome.chooseFile}
+        {localModel ? copy.welcome.openLocal : copy.welcome.chooseFile}
       </button>
+      {localModel && (
+        <button
+          className="button button--quiet"
+          type="button"
+          onClick={() => inputRef.current?.click()}
+        >
+          {copy.welcome.chooseFile}
+        </button>
+      )}
       <input
         ref={inputRef}
         className="visually-hidden"
         type="file"
-        accept=".stl,.obj,.glb,.gltf"
+        accept=".stl"
         onChange={handleInput}
         aria-hidden="true"
         tabIndex={-1}

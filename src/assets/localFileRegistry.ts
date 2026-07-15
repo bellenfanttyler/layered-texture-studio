@@ -10,3 +10,10 @@ export const registerLocalModel = (file: File): string => {
 export const clearLocalModels = (): void => {
   localFiles.clear();
 };
+
+export const getLocalModel = (id: string): File => {
+  const file = localFiles.get(id);
+  if (!file)
+    throw new Error("The selected local model is no longer available.");
+  return file;
+};

@@ -17,7 +17,7 @@ export const validateModelFile = (file: File): FileValidationResult => {
     return {
       valid: false,
       extension,
-      message: "Choose an STL, OBJ, GLB, or GLTF model.",
+      message: "Choose an STL model for this release.",
     };
   }
 

@@ -25,9 +25,18 @@ export default defineConfig(({ mode }) => {
         },
       },
     ],
+    optimizeDeps: {
+      include: [
+        "three",
+        "three/examples/jsm/loaders/STLLoader.js",
+        "@react-three/fiber",
+        "@react-three/drei",
+      ],
+    },
     build: {
       sourcemap: true,
       target: "es2022",
+      chunkSizeWarningLimit: 600,
     },
     test: {
       environment: "jsdom",

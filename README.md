@@ -1,6 +1,6 @@
 # Layered 3D Texture Studio
 
-A static, local-first browser application for building nondestructive texture and displacement layers on 3D models. This repository currently contains the production application foundation, white-label configuration, responsive welcome experience, and selectable bundled samples.
+A static, local-first browser application for building nondestructive texture and displacement layers on 3D models. The current build includes a worker-based STL import and inspection slice on top of the white-label application foundation.
 
 ## Current scope
 
@@ -8,15 +8,19 @@ Implemented in this initialization milestone:
 
 - Vite, React, and strict TypeScript application foundation
 - Responsive dark/light welcome shell with accessible focus and reduced-motion behavior
-- Local model file selection for STL, OBJ, GLB, and GLTF files
+- Local model file selection for binary and ASCII STL files
 - Selectable bundled sample models and texture maps
+- Binary and ASCII STL parsing in a cancellable Web Worker
+- Interactive React Three Fiber viewport with orbit, zoom, pan, grid, and studio lighting
+- Immutable source mesh buffers stored outside React state
+- Basic dimensions, vertex count, triangle count, assumed units, and file-size reporting
 - Central brand, copy, feature, theme-token, and sample-asset configuration
 - Local-only file registry that keeps `File` objects outside component state
 - WebGL 2 compatibility notice
 - Vitest and Playwright test foundations
 - GitHub Pages build and deployment workflow
 
-Not yet implemented: mesh parsing or rendering, surface painting, texture layers, persistence, workers, diagnostics, project packaging, or geometry export. These capabilities must not be represented as working until their vertical slices are complete and tested.
+Not yet implemented: OBJ/GLB import, surface painting, texture application, layer editing, IndexedDB persistence, full mesh diagnostics, project packaging, or geometry export. These capabilities must not be represented as working until their vertical slices are complete and tested.
 
 ## Requirements
 

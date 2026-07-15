@@ -401,6 +401,25 @@ main {
     color-mix(in srgb, var(--brand-primary) 18%, transparent);
 }
 
+.button--quiet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border-color: var(--border);
+  background: var(--panel);
+  color: var(--text-secondary);
+}
+
+.button--quiet:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.dropzone > .button + .button {
+  margin-top: var(--space-2);
+}
+
 .dropzone__error {
   position: absolute;
   bottom: var(--space-3);
@@ -749,6 +768,10 @@ main {
   gap: var(--space-1);
 }
 
+.selection-summary__action {
+  margin-left: auto;
+}
+
 .selection-summary strong {
   font-size: 0.84rem;
 }
@@ -765,6 +788,320 @@ main {
   color: var(--text-muted);
   font-size: 0.72rem;
   line-height: 1.55;
+}
+
+.import-error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  padding: var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--brand-danger) 45%, var(--border));
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--brand-danger) 8%, var(--panel));
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+}
+
+.import-error svg {
+  flex: none;
+  color: var(--brand-danger);
+}
+
+.import-error span {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.import-error strong {
+  color: var(--text);
+}
+
+.import-screen {
+  display: grid;
+  width: 100%;
+  min-height: calc(100vh - 68px);
+  place-items: center;
+  padding: var(--space-8);
+}
+
+.workspace-loading {
+  display: grid;
+  min-height: calc(100vh - 68px);
+  place-items: center;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.import-card {
+  display: grid;
+  width: min(100%, 520px);
+  justify-items: center;
+  padding: clamp(2rem, 7vw, 4rem);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--panel);
+  box-shadow: var(--shadow-panel);
+  text-align: center;
+}
+
+.import-card__icon {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  margin-bottom: var(--space-5);
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--brand-primary) 45%, var(--border));
+  border-radius: 50%;
+  color: var(--brand-primary);
+}
+
+.import-card__icon svg {
+  animation: import-spin 1.4s linear infinite;
+}
+
+.import-card h1 {
+  margin: var(--space-3) 0 var(--space-2);
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  letter-spacing: -0.04em;
+}
+
+.import-card p {
+  margin: 0 0 var(--space-6);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.progress-track {
+  width: 100%;
+  height: 5px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--panel-soft);
+}
+
+.progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--brand-primary);
+  transition: width 180ms ease;
+}
+
+.progress-value {
+  margin: var(--space-2) 0 var(--space-6);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+}
+
+@keyframes import-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.workspace-main {
+  width: min(1500px, calc(100% - clamp(2rem, 5vw, 4rem)));
+  padding: var(--space-5) 0 var(--space-8);
+}
+
+.workspace-heading {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-5);
+  margin-bottom: var(--space-4);
+}
+
+.workspace-heading > div {
+  min-width: 0;
+}
+
+.workspace-heading h1 {
+  margin: var(--space-1) 0 0;
+  overflow: hidden;
+  font-size: clamp(1.3rem, 3vw, 2rem);
+  font-weight: 570;
+  letter-spacing: -0.035em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.source-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.45rem 0.68rem;
+  border: 1px solid color-mix(in srgb, var(--brand-primary) 35%, var(--border));
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--brand-primary) 7%, var(--panel));
+  color: var(--brand-primary);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+}
+
+.workspace-grid {
+  display: grid;
+  min-height: calc(100vh - 165px);
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: var(--space-4);
+}
+
+.viewport-panel,
+.mesh-panel {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--panel);
+}
+
+.viewport-panel {
+  position: relative;
+  min-height: 580px;
+}
+
+.model-viewport {
+  position: absolute;
+  inset: 0;
+}
+
+.model-viewport canvas {
+  touch-action: none;
+}
+
+.viewport-hint {
+  position: absolute;
+  z-index: 2;
+  bottom: var(--space-4);
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.5rem 0.7rem;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: var(--radius-pill);
+  background: rgb(8 13 10 / 72%);
+  color: #b9c4bd;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  transform: translateX(-50%);
+  backdrop-filter: blur(10px);
+}
+
+.mesh-panel {
+  padding: var(--space-5);
+}
+
+.mesh-panel__heading {
+  display: flex;
+  gap: var(--space-3);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--border);
+}
+
+.mesh-panel__icon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--brand-primary) 10%, var(--panel-soft));
+  color: var(--brand-primary);
+}
+
+.mesh-panel h2,
+.mesh-panel h3,
+.mesh-panel p {
+  margin: 0;
+}
+
+.mesh-panel h2 {
+  font-size: 0.95rem;
+}
+
+.mesh-panel__heading p,
+.selected-maps p,
+.selected-maps small {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+
+.mesh-panel__heading p {
+  margin-top: var(--space-1);
+}
+
+.mesh-metrics {
+  margin: var(--space-5) 0;
+}
+
+.mesh-metrics > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.mesh-metrics dt {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+.mesh-metrics dd {
+  margin: 0;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.67rem;
+  text-align: right;
+}
+
+.selected-maps {
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--workspace-raised);
+}
+
+.selected-maps__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  color: var(--brand-primary);
+}
+
+.selected-maps h3 {
+  color: var(--text);
+  font-size: 0.78rem;
+}
+
+.selected-map-list {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.selected-map-list > div {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+}
+
+.selected-map-list img {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  filter: grayscale(0.7);
 }
 
 .app-footer {
@@ -831,6 +1168,20 @@ main {
   .texture-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+
+  .workspace-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mesh-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-5);
+  }
+
+  .mesh-panel__heading {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 720px) {
@@ -888,6 +1239,46 @@ main {
 
   .app-footer nav {
     flex-wrap: wrap;
+  }
+
+  .selection-summary {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .selection-summary__action {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .workspace-heading {
+    grid-template-columns: 1fr auto;
+  }
+
+  .workspace-heading > .button {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .source-badge {
+    font-size: 0;
+  }
+
+  .source-badge svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .viewport-panel {
+    min-height: 480px;
+  }
+
+  .mesh-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .mesh-panel__heading {
+    grid-column: auto;
   }
 }
 
