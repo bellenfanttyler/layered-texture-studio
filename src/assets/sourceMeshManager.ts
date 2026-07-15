@@ -1,4 +1,5 @@
 import { BufferAttribute, BufferGeometry } from "three";
+import { MeshBVH } from "three-mesh-bvh";
 import type { ParsedMeshData } from "../types/mesh";
 
 export interface SourceMeshAsset extends ParsedMeshData {
@@ -31,6 +32,9 @@ export const sourceMeshManager = {
       "normal",
       new BufferAttribute(asset.normals.slice(), 3),
     );
+    geometry.boundsTree = MeshBVH.deserialize(asset.bvh, geometry, {
+      setIndex: true,
+    });
     geometry.computeBoundingSphere();
     return geometry;
   },

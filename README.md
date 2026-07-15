@@ -14,13 +14,17 @@ Implemented in this initialization milestone:
 - Interactive React Three Fiber viewport with orbit, zoom, pan, grid, and studio lighting
 - Immutable source mesh buffers stored outside React state
 - Basic dimensions, vertex count, triangle count, assumed units, and file-size reporting
+- Worker-built BVH acceleration for viewport raycasting and brush queries
+- One independent per-vertex selection mask stored outside React state
+- On-surface painting with radius, hardness, strength, front-facing protection, and Alt-to-erase
+- Stroke-level undo and redo with mask deltas rather than project copies
 - Central brand, copy, feature, theme-token, and sample-asset configuration
 - Local-only file registry that keeps `File` objects outside component state
 - WebGL 2 compatibility notice
 - Vitest and Playwright test foundations
 - GitHub Pages build and deployment workflow
 
-Not yet implemented: OBJ/GLB import, surface painting, texture application, layer editing, IndexedDB persistence, full mesh diagnostics, project packaging, or geometry export. These capabilities must not be represented as working until their vertical slices are complete and tested.
+Not yet implemented: OBJ/GLB import, multiple editable layers, texture application or displacement, IndexedDB persistence, full mesh diagnostics, project packaging, or geometry export. The current paint tool edits the first selection mask only.
 
 ## Requirements
 

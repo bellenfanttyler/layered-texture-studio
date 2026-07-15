@@ -26,4 +26,6 @@ Future mesh work must preserve these invariants:
 
 The viewport disposes its copied geometry on unmount, and closing the workspace removes the source asset. Import cancellation terminates the parser worker.
 
-The next complete slice should build adjacency and BVH data in a worker, create the first independent per-vertex mask asset, and support one dependable visible-surface paint stroke with undo.
+The third slice builds and serializes a mesh BVH in the parser worker. The immutable source asset retains the acceleration buffers, while each preview deserializes its own raycast structure. A dedicated mask manager owns per-vertex `Float32Array` weights. Painting uses BVH sphere queries, hit-normal similarity, and camera-facing tests; preview colors update during interaction, and pointer-up commits one delta-based history command.
+
+The next complete slice should introduce normalized texture-layer state, retain the current mask as Layer 1, connect a selected grayscale sample to triplanar preview sampling, and keep source geometry unchanged.

@@ -1,6 +1,7 @@
 /// <reference lib="webworker" />
 
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
+import { MeshBVH } from "three-mesh-bvh";
 import type { MeshCenter, MeshDimensions } from "../types/mesh";
 import type {
   ParseMeshRequest,
@@ -63,6 +64,24 @@ worker.onmessage = (event: MessageEvent<ParseMeshRequest>) => {
     const geometry = new STLLoader().parse(request.buffer);
     if (!geometry.getAttribute("normal")) geometry.computeVertexNormals();
 
+    post({
+      type: "progress",
+      requestId: request.requestId,
+      message: "Building surface acceleration",
+      progress: 60,
+    });
+
+    const bvh = new MeshBVH(geometry, {
+      onProgress: (progress) =>
+        post({
+          type: "progress",
+          requestId: request.requestId,
+          message: "Building surface acceleration",
+          progress: 60 + Math.round(progress * 30),
+        }),
+    });
+    const serializedBvh = MeshBVH.serialize(bvh);
+
     const positions = new Float32Array(geometry.getAttribute("position").array);
     const normals = new Float32Array(geometry.getAttribute("normal").array);
     geometry.dispose();
@@ -81,10 +100,19 @@ worker.onmessage = (event: MessageEvent<ParseMeshRequest>) => {
           normals,
           vertexCount: positions.length / 3,
           triangleCount: positions.length / 9,
+          bvh: serializedBvh,
           ...measurement,
         },
       },
-      [positions.buffer, normals.buffer],
+      [
+        positions.buffer,
+        normals.buffer,
+        ...serializedBvh.roots,
+        ...(serializedBvh.index ? [serializedBvh.index.buffer] : []),
+        ...(serializedBvh.indirectBuffer
+          ? [serializedBvh.indirectBuffer.buffer]
+          : []),
+      ],
     );
   } catch (error) {
     post({

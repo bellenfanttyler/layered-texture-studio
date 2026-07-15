@@ -972,6 +972,52 @@ main {
   touch-action: none;
 }
 
+.model-viewport--paint canvas {
+  cursor: crosshair;
+}
+
+.viewport-tools {
+  position: absolute;
+  z-index: 3;
+  top: var(--space-4);
+  left: var(--space-4);
+  display: flex;
+  gap: var(--space-2);
+}
+
+.viewport-tool {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
+  cursor: pointer;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: var(--radius-sm);
+  background: rgb(8 13 10 / 76%);
+  color: #aebbb3;
+  font-size: 0.68rem;
+  backdrop-filter: blur(10px);
+}
+
+.viewport-tool:hover,
+.viewport-tool--active {
+  border-color: color-mix(in srgb, var(--brand-primary) 55%, transparent);
+  color: var(--brand-primary);
+}
+
+.viewport-tool kbd {
+  display: grid;
+  min-width: 18px;
+  height: 18px;
+  place-items: center;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 4px;
+  color: #819087;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+}
+
 .viewport-hint {
   position: absolute;
   z-index: 2;
@@ -1037,6 +1083,97 @@ main {
 
 .mesh-metrics {
   margin: var(--space-5) 0;
+}
+
+.brush-panel {
+  margin-top: var(--space-5);
+  padding: var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--brand-primary) 25%, var(--border));
+  border-radius: var(--radius-sm);
+  background: color-mix(
+    in srgb,
+    var(--brand-primary) 4%,
+    var(--workspace-raised)
+  );
+}
+
+.brush-panel__title {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.brush-panel__title > span {
+  width: 10px;
+  height: 32px;
+  border-radius: var(--radius-pill);
+}
+
+.brush-panel__title small {
+  color: var(--text-muted);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+}
+
+.brush-panel__title h3 {
+  margin-top: 2px;
+}
+
+.brush-panel__title strong {
+  color: var(--brand-primary);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+}
+
+.history-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.history-actions button {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  color: var(--text-secondary);
+  font-size: 0.62rem;
+}
+
+.history-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.38;
+}
+
+.brush-control {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.brush-control > span {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+}
+
+.brush-control output {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}
+
+.brush-control input {
+  width: 100%;
+  accent-color: var(--brand-primary);
 }
 
 .mesh-metrics > div {

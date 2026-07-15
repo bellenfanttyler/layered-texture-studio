@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { LoadedModelSummary } from "../types/mesh";
+import type { LoadedModelSummary, MaskLayerSummary } from "../types/mesh";
 
 export type Theme = "dark" | "light";
 
@@ -20,15 +20,32 @@ interface WelcomeState {
   importProgress: number;
   importError: string | null;
   loadedModel: LoadedModelSummary | null;
+  activeLayer: MaskLayerSummary | null;
+  activeTool: "orbit" | "paint";
+  brushRadius: number;
+  brushHardness: number;
+  brushStrength: number;
+  maskRevision: number;
+  canUndo: boolean;
+  canRedo: boolean;
   setTheme: (theme: Theme) => void;
   selectSampleModel: (id: string) => void;
   toggleSampleTexture: (id: string) => void;
   selectLocalModel: (model: LocalModelSelection) => void;
   startImport: () => void;
   updateImportProgress: (message: string, progress: number) => void;
-  finishImport: (model: LoadedModelSummary) => void;
+  finishImport: (model: LoadedModelSummary, layer: MaskLayerSummary) => void;
   failImport: (message: string) => void;
   returnToWelcome: () => void;
+  setActiveTool: (tool: "orbit" | "paint") => void;
+  setBrushRadius: (radius: number) => void;
+  setBrushHardness: (hardness: number) => void;
+  setBrushStrength: (strength: number) => void;
+  updateMaskState: (
+    coverage: number,
+    canUndo: boolean,
+    canRedo: boolean,
+  ) => void;
 }
 
 export const useWelcomeStore = create<WelcomeState>((set) => ({
@@ -41,6 +58,14 @@ export const useWelcomeStore = create<WelcomeState>((set) => ({
   importProgress: 0,
   importError: null,
   loadedModel: null,
+  activeLayer: null,
+  activeTool: "orbit",
+  brushRadius: 5,
+  brushHardness: 0.55,
+  brushStrength: 0.7,
+  maskRevision: 0,
+  canUndo: false,
+  canRedo: false,
   setTheme: (theme) => set({ theme }),
   selectSampleModel: (id) => set({ selectedModelId: id, localModel: null }),
   toggleSampleTexture: (id) =>
@@ -60,10 +85,18 @@ export const useWelcomeStore = create<WelcomeState>((set) => ({
     }),
   updateImportProgress: (message, progress) =>
     set({ importMessage: message, importProgress: progress }),
-  finishImport: (model) =>
+  finishImport: (model, layer) =>
     set({
       screen: "workspace",
       loadedModel: model,
+      activeLayer: layer,
+      activeTool: "orbit",
+      brushRadius:
+        Math.max(
+          model.dimensions.width,
+          model.dimensions.height,
+          model.dimensions.depth,
+        ) * 0.08,
       importMessage: "Model ready",
       importProgress: 100,
       importError: null,
@@ -79,7 +112,24 @@ export const useWelcomeStore = create<WelcomeState>((set) => ({
     set({
       screen: "welcome",
       loadedModel: null,
+      activeLayer: null,
+      activeTool: "orbit",
       importError: null,
       importProgress: 0,
+      canUndo: false,
+      canRedo: false,
     }),
+  setActiveTool: (activeTool) => set({ activeTool }),
+  setBrushRadius: (brushRadius) => set({ brushRadius }),
+  setBrushHardness: (brushHardness) => set({ brushHardness }),
+  setBrushStrength: (brushStrength) => set({ brushStrength }),
+  updateMaskState: (coverage, canUndo, canRedo) =>
+    set((state) => ({
+      activeLayer: state.activeLayer
+        ? { ...state.activeLayer, coverage }
+        : null,
+      canUndo,
+      canRedo,
+      maskRevision: state.maskRevision + 1,
+    })),
 }));

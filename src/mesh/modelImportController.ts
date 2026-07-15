@@ -1,7 +1,11 @@
 import { getLocalModel } from "../assets/localFileRegistry";
+import { maskAssetManager } from "../assets/maskAssetManager";
 import { sourceMeshManager } from "../assets/sourceMeshManager";
 import { useWelcomeStore, type LocalModelSelection } from "../app/store";
+import { brand } from "../config/brand";
+import { copy } from "../config/copy";
 import type { SampleModel } from "../config/sampleAssets";
+import { maskStrokeHistory } from "../history/maskStrokeHistory";
 import { parseMesh } from "./parseMesh";
 
 let activeImport: AbortController | null = null;
@@ -39,21 +43,34 @@ const runImport = async (
 
     const previousAssetId =
       useWelcomeStore.getState().loadedModel?.sourceAssetId;
+    const previousMaskId = useWelcomeStore.getState().activeLayer?.maskAssetId;
     const sourceAssetId = sourceMeshManager.register(parsed);
+    const maskAssetId = maskAssetManager.create(parsed.vertexCount);
     if (previousAssetId) sourceMeshManager.remove(previousAssetId);
+    if (previousMaskId) maskAssetManager.remove(previousMaskId);
+    maskStrokeHistory.clear();
 
-    useWelcomeStore.getState().finishImport({
-      sourceAssetId,
-      name: source.name,
-      format: "stl",
-      units: source.units,
-      fileSize,
-      vertexCount: parsed.vertexCount,
-      triangleCount: parsed.triangleCount,
-      dimensions: parsed.dimensions,
-      center: parsed.center,
-      selectedTextureIds: [...selectedTextureIds],
-    });
+    useWelcomeStore.getState().finishImport(
+      {
+        sourceAssetId,
+        name: source.name,
+        format: "stl",
+        units: source.units,
+        fileSize,
+        vertexCount: parsed.vertexCount,
+        triangleCount: parsed.triangleCount,
+        dimensions: parsed.dimensions,
+        center: parsed.center,
+        selectedTextureIds: [...selectedTextureIds],
+      },
+      {
+        id: crypto.randomUUID(),
+        name: copy.workspace.defaultLayerName,
+        maskAssetId,
+        coverage: 0,
+        displayColor: brand.colors.primary,
+      },
+    );
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") return;
     useWelcomeStore
@@ -110,6 +127,9 @@ export const cancelModelImport = (): void => {
 
 export const closeWorkspace = (): void => {
   const assetId = useWelcomeStore.getState().loadedModel?.sourceAssetId;
+  const maskAssetId = useWelcomeStore.getState().activeLayer?.maskAssetId;
   if (assetId) sourceMeshManager.remove(assetId);
+  if (maskAssetId) maskAssetManager.remove(maskAssetId);
+  maskStrokeHistory.clear();
   useWelcomeStore.getState().returnToWelcome();
 };

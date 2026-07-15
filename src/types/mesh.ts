@@ -19,6 +19,15 @@ export interface ParsedMeshData {
   triangleCount: number;
   dimensions: MeshDimensions;
   center: MeshCenter;
+  bvh: SerializedBVH;
+}
+
+export interface MaskLayerSummary {
+  id: string;
+  name: string;
+  maskAssetId: string;
+  coverage: number;
+  displayColor: string;
 }
 
 export interface LoadedModelSummary {
@@ -33,3 +42,4 @@ export interface LoadedModelSummary {
   center: MeshCenter;
   selectedTextureIds: string[];
 }
+import type { SerializedBVH } from "three-mesh-bvh";
