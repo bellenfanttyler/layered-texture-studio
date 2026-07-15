@@ -23,7 +23,7 @@ export const copy = {
     openLocal: "Open selected model",
     privacy: "Your files stay on this device. Nothing is uploaded.",
     initializationNote:
-      "STL viewing is available now. Surface painting, texture application, project saving, and geometry export remain hidden until those workflows are complete.",
+      "STL viewing, surface painting, and texture preview are available. Project saving and printable geometry export remain hidden until those workflows are complete.",
     compatibilityTitle: "WebGL 2 is unavailable.",
     compatibilityDetail:
       "Model preview requires a recent browser with hardware acceleration enabled.",
@@ -55,16 +55,24 @@ export const copy = {
     paintTool: "Paint selection",
     undo: "Undo stroke",
     redo: "Redo stroke",
-    activeLayer: "Active selection layer",
-    defaultLayerName: "Selection Layer 1",
+    activeLayer: "Active texture layer",
+    defaultLayerName: "Texture Layer 1",
     coverage: "Coverage",
     radius: "Brush radius",
     hardness: "Hardness",
     strength: "Strength",
-    selectedMaps: "Selected maps",
-    selectedMapsDetail:
-      "These references are preserved for the upcoming layer workflow; they are not yet applied to the mesh.",
-    noMaps: "No texture maps selected.",
+    textureHeading: "Height texture",
+    textureDetail:
+      "Texture height is projected from three axes and blended across curved surfaces.",
+    mappingScale: "Texture scale",
+    amplitude: "Amplitude",
+    midpoint: "Zero height",
+    influence: "Influence",
+    invert: "Invert height",
+    visible: "Show texture displacement",
+    selectedTexture: "Active texture",
+    previewBuilding: "Updating texture preview...",
+    previewError: "Texture preview unavailable",
   },
   steps: [
     {

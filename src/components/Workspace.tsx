@@ -37,6 +37,7 @@ export function Workspace() {
   const setBrushStrength = useWelcomeStore((state) => state.setBrushStrength);
   const canUndo = useWelcomeStore((state) => state.canUndo);
   const canRedo = useWelcomeStore((state) => state.canRedo);
+  const updateActiveLayer = useWelcomeStore((state) => state.updateActiveLayer);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -67,8 +68,8 @@ export function Workspace() {
     1,
   );
 
-  const selectedTextures = sampleTextures.filter((texture) =>
-    model.selectedTextureIds.includes(texture.id),
+  const activeTexture = sampleTextures.find(
+    (texture) => texture.id === layer?.textureId,
   );
 
   return (
@@ -235,6 +236,144 @@ export function Workspace() {
             </section>
           )}
 
+          {layer && activeTexture && (
+            <section
+              className="texture-panel"
+              aria-labelledby="texture-heading"
+            >
+              <div className="texture-panel__heading">
+                <div>
+                  <small>{copy.workspace.selectedTexture}</small>
+                  <h3 id="texture-heading">{copy.workspace.textureHeading}</h3>
+                </div>
+                <strong>{activeTexture.name}</strong>
+              </div>
+              <div
+                className="texture-library"
+                role="list"
+                aria-label={copy.workspace.textureHeading}
+              >
+                {sampleTextures.map((texture) => (
+                  <button
+                    key={texture.id}
+                    type="button"
+                    aria-pressed={texture.id === layer.textureId}
+                    aria-label={texture.name}
+                    onClick={() =>
+                      updateActiveLayer({
+                        textureId: texture.id,
+                        mappingScale: texture.defaultScale,
+                        amplitude: Math.min(
+                          texture.defaultAmplitude,
+                          maximumDimension * 0.05,
+                        ),
+                      })
+                    }
+                  >
+                    <img
+                      src={texture.thumbnailUrl ?? texture.imageUrl}
+                      alt=""
+                    />
+                    <span>{texture.name}</span>
+                  </button>
+                ))}
+              </div>
+              <p>{copy.workspace.textureDetail}</p>
+              <label className="brush-control">
+                <span>
+                  {copy.workspace.mappingScale}
+                  <output>{layer.mappingScale.toFixed(2)}&times;</output>
+                </span>
+                <input
+                  data-testid="texture-scale"
+                  type="range"
+                  min={0.25}
+                  max={8}
+                  step={0.25}
+                  value={layer.mappingScale}
+                  onChange={(event) =>
+                    updateActiveLayer({
+                      mappingScale: Number(event.target.value),
+                    })
+                  }
+                />
+              </label>
+              <label className="brush-control">
+                <span>
+                  {copy.workspace.amplitude}
+                  <output>
+                    {formatMeasurement(layer.amplitude)} {model.units}
+                  </output>
+                </span>
+                <input
+                  data-testid="texture-amplitude"
+                  type="range"
+                  min={0}
+                  max={maximumDimension * 0.05}
+                  step={maximumDimension * 0.0005}
+                  value={layer.amplitude}
+                  onChange={(event) =>
+                    updateActiveLayer({ amplitude: Number(event.target.value) })
+                  }
+                />
+              </label>
+              <label className="brush-control">
+                <span>
+                  {copy.workspace.midpoint}
+                  <output>{Math.round(layer.midpoint * 100)}%</output>
+                </span>
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={layer.midpoint}
+                  onChange={(event) =>
+                    updateActiveLayer({ midpoint: Number(event.target.value) })
+                  }
+                />
+              </label>
+              <label className="brush-control">
+                <span>
+                  {copy.workspace.influence}
+                  <output>{Math.round(layer.influence * 100)}%</output>
+                </span>
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={layer.influence}
+                  onChange={(event) =>
+                    updateActiveLayer({ influence: Number(event.target.value) })
+                  }
+                />
+              </label>
+              <div className="texture-toggles">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={layer.visible}
+                    onChange={(event) =>
+                      updateActiveLayer({ visible: event.target.checked })
+                    }
+                  />
+                  {copy.workspace.visible}
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={layer.invert}
+                    onChange={(event) =>
+                      updateActiveLayer({ invert: event.target.checked })
+                    }
+                  />
+                  {copy.workspace.invert}
+                </label>
+              </div>
+            </section>
+          )}
+
           <dl className="mesh-metrics">
             <div>
               <dt>{copy.workspace.dimensions}</dt>
@@ -271,24 +410,9 @@ export function Workspace() {
           <div className="selected-maps">
             <div className="selected-maps__title">
               <Layers3 size={17} aria-hidden="true" />
-              <h3>{copy.workspace.selectedMaps}</h3>
+              <h3>{layer?.name}</h3>
             </div>
-            {selectedTextures.length ? (
-              <div className="selected-map-list">
-                {selectedTextures.map((texture) => (
-                  <div key={texture.id}>
-                    <img
-                      src={texture.thumbnailUrl ?? texture.imageUrl}
-                      alt=""
-                    />
-                    <span>{texture.name}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p>{copy.workspace.noMaps}</p>
-            )}
-            <small>{copy.workspace.selectedMapsDetail}</small>
+            <small>{copy.workspace.sourceDetail}</small>
           </div>
         </aside>
       </section>

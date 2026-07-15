@@ -1,6 +1,14 @@
 import { expect, test } from "@playwright/test";
 
-test("a visitor can paint and undo a surface selection", async ({ page }) => {
+test("a visitor can paint a textured surface selection", async ({ page }) => {
+  const browserIssues: string[] = [];
+  page.on("console", (message) => {
+    if (["error", "warning"].includes(message.type()))
+      browserIssues.push(`${message.type()}: ${message.text()}`);
+  });
+  page.on("pageerror", (error) =>
+    browserIssues.push(`error: ${error.message}`),
+  );
   await page.goto("/");
 
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
@@ -17,31 +25,59 @@ test("a visitor can paint and undo a surface selection", async ({ page }) => {
   ).toBeVisible({
     timeout: 15_000,
   });
-  await expect(page.getByTestId("model-viewport")).toBeVisible();
+  const viewport = page.getByTestId("model-viewport");
+  await expect(viewport).toBeVisible();
+  await expect(viewport).toHaveAttribute("data-preview-ready", "true", {
+    timeout: 15_000,
+  });
   await expect(page.getByText("Immutable source")).toBeVisible();
+  const canvas = viewport.locator("canvas");
+  await canvas.evaluate((element) => {
+    element.addEventListener("webglcontextlost", () => {
+      element.dataset.contextLost = "true";
+    });
+  });
+  await expect(page.getByRole("button", { name: "Tile 014" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
 
   await page.getByRole("button", { name: /Paint selection/i }).click();
-  const viewport = page.getByTestId("model-viewport");
   const bounds = await viewport.boundingBox();
   if (!bounds) throw new Error("Viewport bounds are unavailable.");
-  await page.mouse.move(
-    bounds.x + bounds.width * 0.5,
-    bounds.y + bounds.height * 0.5,
-  );
-  await page.mouse.down();
-  await page.mouse.move(
-    bounds.x + bounds.width * 0.56,
-    bounds.y + bounds.height * 0.5,
-    {
-      steps: 5,
-    },
-  );
-  await page.mouse.up();
-
   const coverage = page.getByTestId("mask-coverage");
+  for (const verticalRatio of [0.5, 0.65, 0.8]) {
+    await page.mouse.move(
+      bounds.x + bounds.width * 0.5,
+      bounds.y + bounds.height * verticalRatio,
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      bounds.x + bounds.width * 0.56,
+      bounds.y + bounds.height * verticalRatio,
+      { steps: 5 },
+    );
+    await page.mouse.up();
+    if ((await coverage.textContent()) !== "0.0%") break;
+  }
+
   await expect(coverage).not.toHaveText("0.0%");
   await page.getByRole("button", { name: "Undo stroke" }).click();
   await expect(coverage).toHaveText("0.0%");
   await page.getByRole("button", { name: "Redo stroke" }).click();
   await expect(coverage).not.toHaveText("0.0%");
+
+  await page.getByRole("button", { name: "Fabric 025" }).click();
+  await expect(
+    page.getByRole("button", { name: "Fabric 025" }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await page.getByTestId("texture-scale").fill("2");
+  await page.getByTestId("texture-amplitude").fill("0.08");
+  await page.getByRole("checkbox", { name: "Invert height" }).check();
+  await expect(
+    page.getByRole("checkbox", { name: "Invert height" }),
+  ).toBeChecked();
+  await page.waitForTimeout(10_000);
+  await expect(canvas).not.toHaveAttribute("data-context-lost", "true");
+  expect(browserIssues).toEqual([]);
 });

@@ -4,7 +4,7 @@ import { sourceMeshManager } from "../assets/sourceMeshManager";
 import { useWelcomeStore, type LocalModelSelection } from "../app/store";
 import { brand } from "../config/brand";
 import { copy } from "../config/copy";
-import type { SampleModel } from "../config/sampleAssets";
+import { sampleTextures, type SampleModel } from "../config/sampleAssets";
 import { maskStrokeHistory } from "../history/maskStrokeHistory";
 import { parseMesh } from "./parseMesh";
 
@@ -49,6 +49,17 @@ const runImport = async (
     if (previousAssetId) sourceMeshManager.remove(previousAssetId);
     if (previousMaskId) maskAssetManager.remove(previousMaskId);
     maskStrokeHistory.clear();
+    const initialTexture =
+      sampleTextures.find((texture) =>
+        selectedTextureIds.includes(texture.id),
+      ) ?? sampleTextures[0];
+    if (!initialTexture) throw new Error("No bundled texture is configured.");
+    const maximumDimension = Math.max(
+      parsed.dimensions.width,
+      parsed.dimensions.height,
+      parsed.dimensions.depth,
+      1,
+    );
 
     useWelcomeStore.getState().finishImport(
       {
@@ -69,6 +80,16 @@ const runImport = async (
         maskAssetId,
         coverage: 0,
         displayColor: brand.colors.primary,
+        textureId: initialTexture.id,
+        visible: true,
+        mappingScale: initialTexture.defaultScale,
+        amplitude: Math.min(
+          initialTexture.defaultAmplitude,
+          maximumDimension * 0.05,
+        ),
+        midpoint: 0.5,
+        influence: 1,
+        invert: false,
       },
     );
   } catch (error) {

@@ -25,6 +25,12 @@ export const updateMaskColors = (
   displayColor: string,
   indices?: Iterable<number>,
 ): void => {
+  let maskAttribute = geometry.getAttribute("maskWeight") as
+    BufferAttribute | undefined;
+  if (!maskAttribute) {
+    maskAttribute = new BufferAttribute(weights, 1);
+    geometry.setAttribute("maskWeight", maskAttribute);
+  }
   let colorAttribute = geometry.getAttribute("color") as
     BufferAttribute | undefined;
   if (!colorAttribute) {
@@ -45,4 +51,26 @@ export const updateMaskColors = (
     colorAttribute.setXYZ(index, mixed.r, mixed.g, mixed.b);
   }
   colorAttribute.needsUpdate = true;
+  maskAttribute.needsUpdate = true;
+};
+
+export const updateTexturePreviewColors = (
+  geometry: BufferGeometry,
+  weights: Float32Array,
+  heights: Float32Array,
+  displayColor: string,
+  visible: boolean,
+): void => {
+  const selectedColor = new Color(displayColor);
+  const mixed = new Color();
+  const colors = new Float32Array(weights.length * 3);
+  weights.forEach((weight, index) => {
+    const previewWeight = visible ? weight : 0;
+    const tone = 0.72 + (heights[index] ?? 0.5) * 0.42;
+    mixed.copy(baseColor).lerp(selectedColor, previewWeight * 0.28);
+    colors[index * 3] = mixed.r * (1 + (tone - 1) * previewWeight);
+    colors[index * 3 + 1] = mixed.g * (1 + (tone - 1) * previewWeight);
+    colors[index * 3 + 2] = mixed.b * (1 + (tone - 1) * previewWeight);
+  });
+  geometry.setAttribute("color", new BufferAttribute(colors, 3));
 };

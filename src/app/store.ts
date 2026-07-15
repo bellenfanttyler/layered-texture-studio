@@ -41,6 +41,7 @@ interface WelcomeState {
   setBrushRadius: (radius: number) => void;
   setBrushHardness: (hardness: number) => void;
   setBrushStrength: (strength: number) => void;
+  updateActiveLayer: (changes: Partial<MaskLayerSummary>) => void;
   updateMaskState: (
     coverage: number,
     canUndo: boolean,
@@ -123,6 +124,12 @@ export const useWelcomeStore = create<WelcomeState>((set) => ({
   setBrushRadius: (brushRadius) => set({ brushRadius }),
   setBrushHardness: (brushHardness) => set({ brushHardness }),
   setBrushStrength: (brushStrength) => set({ brushStrength }),
+  updateActiveLayer: (changes) =>
+    set((state) => ({
+      activeLayer: state.activeLayer
+        ? { ...state.activeLayer, ...changes }
+        : null,
+    })),
   updateMaskState: (coverage, canUndo, canRedo) =>
     set((state) => ({
       activeLayer: state.activeLayer

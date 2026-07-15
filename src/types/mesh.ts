@@ -28,6 +28,13 @@ export interface MaskLayerSummary {
   maskAssetId: string;
   coverage: number;
   displayColor: string;
+  textureId: string;
+  visible: boolean;
+  mappingScale: number;
+  amplitude: number;
+  midpoint: number;
+  influence: number;
+  invert: boolean;
 }
 
 export interface LoadedModelSummary {

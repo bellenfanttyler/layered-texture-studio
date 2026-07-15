@@ -18,13 +18,15 @@ Implemented in this initialization milestone:
 - One independent per-vertex selection mask stored outside React state
 - On-surface painting with radius, hardness, strength, front-facing protection, and Alt-to-erase
 - Stroke-level undo and redo with mask deltas rather than project copies
+- One functional texture layer with selectable bundled height maps
+- Worker-generated triplanar height preview with mask-limited displacement, scale, midpoint, influence, inversion, and visibility controls
 - Central brand, copy, feature, theme-token, and sample-asset configuration
 - Local-only file registry that keeps `File` objects outside component state
 - WebGL 2 compatibility notice
 - Vitest and Playwright test foundations
 - GitHub Pages build and deployment workflow
 
-Not yet implemented: OBJ/GLB import, multiple editable layers, texture application or displacement, IndexedDB persistence, full mesh diagnostics, project packaging, or geometry export. The current paint tool edits the first selection mask only.
+Not yet implemented: OBJ/GLB import, multiple editable layers, export-quality displacement, IndexedDB persistence, full mesh diagnostics, project packaging, or geometry export. The current worker-derived displacement is a nondestructive live preview; printable geometry is not yet generated.
 
 ## Requirements
 
