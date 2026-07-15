@@ -1,0 +1,56 @@
+:root {
+  --brand-primary: #78d9bd;
+  --brand-accent: #edbd75;
+  --brand-success: #79d4a2;
+  --brand-warning: #f0b96a;
+  --brand-danger: #ef8585;
+  --font-interface: Inter, "Segoe UI", system-ui, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --radius-sm: 0.45rem;
+  --radius-md: 0.8rem;
+  --radius-lg: 1.2rem;
+  --radius-pill: 999px;
+  --shadow-panel: 0 24px 70px rgb(0 0 0 / 22%);
+  --transition-fast: 150ms ease;
+}
+
+[data-theme="dark"] {
+  --workspace: #0c110f;
+  --workspace-raised: #111714;
+  --panel: #151c18;
+  --panel-raised: #1a231e;
+  --panel-soft: #202a24;
+  --text: #edf4ef;
+  --text-secondary: #a6b1aa;
+  --text-muted: #748078;
+  --border: #2b3630;
+  --border-strong: #3c4942;
+  --grid-line: rgb(167 190 177 / 7%);
+  --overlay: rgb(8 13 10 / 74%);
+}
+
+[data-theme="light"] {
+  --workspace: #e7ebe7;
+  --workspace-raised: #f1f4f0;
+  --panel: #f8faf7;
+  --panel-raised: #ffffff;
+  --panel-soft: #e9eee9;
+  --text: #17201b;
+  --text-secondary: #4f5d55;
+  --text-muted: #7a867e;
+  --border: #ccd5ce;
+  --border-strong: #aebbb2;
+  --grid-line: rgb(36 62 47 / 7%);
+  --overlay: rgb(240 245 241 / 78%);
+  --shadow-panel: 0 24px 70px rgb(32 53 41 / 14%);
+}
