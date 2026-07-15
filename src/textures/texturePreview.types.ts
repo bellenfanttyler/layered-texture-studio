@@ -1,6 +1,5 @@
-export interface TexturePreviewRequest {
-  positions: Float32Array;
-  normals: Float32Array;
+export interface TexturePreviewLayerRequest {
+  id: string;
   maskWeights: Float32Array;
   textureUrl: string;
   textureScale: number;
@@ -9,6 +8,14 @@ export interface TexturePreviewRequest {
   influence: number;
   invert: boolean;
   visible: boolean;
+  blendMode: "add" | "subtract" | "replace";
+}
+
+export interface TexturePreviewRequest {
+  positions: Float32Array;
+  normals: Float32Array;
+  layers: TexturePreviewLayerRequest[];
+  activeLayerId: string;
 }
 
 export interface TexturePreviewResult {

@@ -36,6 +36,6 @@ export const createTexturePreview = (
     worker.postMessage(request, [
       request.positions.buffer,
       request.normals.buffer,
-      request.maskWeights.buffer,
+      ...request.layers.map((layer) => layer.maskWeights.buffer),
     ]);
   });

@@ -6,9 +6,12 @@ export interface MaskAsset {
 const masks = new Map<string, MaskAsset>();
 
 export const maskAssetManager = {
-  create(vertexCount: number): string {
+  create(vertexCount: number, initialWeights?: Float32Array): string {
     const id = crypto.randomUUID();
-    masks.set(id, { id, weights: new Float32Array(vertexCount) });
+    masks.set(id, {
+      id,
+      weights: initialWeights?.slice() ?? new Float32Array(vertexCount),
+    });
     return id;
   },
 

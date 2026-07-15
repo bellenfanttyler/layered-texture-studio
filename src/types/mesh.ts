@@ -35,6 +35,7 @@ export interface MaskLayerSummary {
   midpoint: number;
   influence: number;
   invert: boolean;
+  blendMode: "add" | "subtract" | "replace";
 }
 
 export interface LoadedModelSummary {

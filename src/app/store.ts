@@ -20,6 +20,7 @@ interface WelcomeState {
   importProgress: number;
   importError: string | null;
   loadedModel: LoadedModelSummary | null;
+  layers: MaskLayerSummary[];
   activeLayer: MaskLayerSummary | null;
   activeTool: "orbit" | "paint";
   brushRadius: number;
@@ -42,6 +43,8 @@ interface WelcomeState {
   setBrushHardness: (hardness: number) => void;
   setBrushStrength: (strength: number) => void;
   updateActiveLayer: (changes: Partial<MaskLayerSummary>) => void;
+  setLayers: (layers: MaskLayerSummary[], activeLayerId: string) => void;
+  setActiveLayer: (id: string) => void;
   updateMaskState: (
     coverage: number,
     canUndo: boolean,
@@ -59,6 +62,7 @@ export const useWelcomeStore = create<WelcomeState>((set) => ({
   importProgress: 0,
   importError: null,
   loadedModel: null,
+  layers: [],
   activeLayer: null,
   activeTool: "orbit",
   brushRadius: 5,
@@ -90,6 +94,7 @@ export const useWelcomeStore = create<WelcomeState>((set) => ({
     set({
       screen: "workspace",
       loadedModel: model,
+      layers: [layer],
       activeLayer: layer,
       activeTool: "orbit",
       brushRadius:
@@ -113,6 +118,7 @@ export const useWelcomeStore = create<WelcomeState>((set) => ({
     set({
       screen: "welcome",
       loadedModel: null,
+      layers: [],
       activeLayer: null,
       activeTool: "orbit",
       importError: null,
@@ -129,12 +135,31 @@ export const useWelcomeStore = create<WelcomeState>((set) => ({
       activeLayer: state.activeLayer
         ? { ...state.activeLayer, ...changes }
         : null,
+      layers: state.layers.map((layer) =>
+        layer.id === state.activeLayer?.id ? { ...layer, ...changes } : layer,
+      ),
+    })),
+  setLayers: (layers, activeLayerId) =>
+    set((state) => ({
+      layers,
+      activeLayer: layers.find((layer) => layer.id === activeLayerId) ?? null,
+      maskRevision: state.maskRevision + 1,
+    })),
+  setActiveLayer: (id) =>
+    set((state) => ({
+      activeLayer: state.layers.find((layer) => layer.id === id) ?? null,
+      canUndo: false,
+      canRedo: false,
+      maskRevision: state.maskRevision + 1,
     })),
   updateMaskState: (coverage, canUndo, canRedo) =>
     set((state) => ({
       activeLayer: state.activeLayer
         ? { ...state.activeLayer, coverage }
         : null,
+      layers: state.layers.map((layer) =>
+        layer.id === state.activeLayer?.id ? { ...layer, coverage } : layer,
+      ),
       canUndo,
       canRedo,
       maskRevision: state.maskRevision + 1,

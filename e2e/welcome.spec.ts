@@ -78,6 +78,47 @@ test("a visitor can paint a textured surface selection", async ({ page }) => {
   await expect(
     page.getByRole("checkbox", { name: "Invert height" }),
   ).toBeChecked();
+
+  await page.getByRole("button", { name: "Add layer" }).click();
+  await expect(page.getByLabel("Layer name")).toHaveValue("Texture Layer 2");
+  await expect(viewport).toHaveAttribute("data-preview-ready", "true", {
+    timeout: 15_000,
+  });
+  await expect(coverage).toHaveText("0.0%");
+  const secondBounds = await viewport.boundingBox();
+  if (!secondBounds) throw new Error("Viewport bounds are unavailable.");
+  for (const verticalRatio of [0.5, 0.65, 0.8]) {
+    await page.mouse.move(
+      secondBounds.x + secondBounds.width * 0.5,
+      secondBounds.y + secondBounds.height * verticalRatio,
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      secondBounds.x + secondBounds.width * 0.44,
+      secondBounds.y + secondBounds.height * verticalRatio,
+      { steps: 5 },
+    );
+    await page.mouse.up();
+    if ((await coverage.textContent()) !== "0.0%") break;
+  }
+  await expect(coverage).not.toHaveText("0.0%");
+  await page.getByRole("button", { name: "Select Texture Layer 1" }).click();
+  await expect(coverage).not.toHaveText("0.0%");
+  await page.getByRole("button", { name: "Select Texture Layer 2" }).click();
+  await page.getByLabel("Layer name").fill("Grip details");
+  await page.getByLabel("Blend mode").selectOption("subtract");
+  await page.getByRole("button", { name: "Hide Grip details" }).click();
+  await expect(
+    page.getByRole("button", { name: "Show Grip details" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Show Grip details" }).click();
+  await page.getByRole("button", { name: "Duplicate" }).click();
+  await expect(page.getByLabel("Layer name")).toHaveValue("Grip details Copy");
+  await page.getByRole("button", { name: "Delete active layer" }).click();
+  await expect(page.getByLabel("Layer name")).toHaveValue("Grip details");
+  await expect(viewport).toHaveAttribute("data-preview-ready", "true", {
+    timeout: 15_000,
+  });
   await page.waitForTimeout(10_000);
   await expect(canvas).not.toHaveAttribute("data-context-lost", "true");
   expect(browserIssues).toEqual([]);

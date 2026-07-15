@@ -1,10 +1,10 @@
 # Layered 3D Texture Studio
 
-A static, local-first browser application for building nondestructive texture and displacement layers on 3D models. The current build includes a worker-based STL import and inspection slice on top of the white-label application foundation.
+A static, local-first browser application for building nondestructive texture and displacement layers on 3D models. The current build supports STL import, direct surface painting, and a composited multilayer texture preview on top of the white-label application foundation.
 
 ## Current scope
 
-Implemented in this initialization milestone:
+Implemented so far:
 
 - Vite, React, and strict TypeScript application foundation
 - Responsive dark/light welcome shell with accessible focus and reduced-motion behavior
@@ -15,18 +15,20 @@ Implemented in this initialization milestone:
 - Immutable source mesh buffers stored outside React state
 - Basic dimensions, vertex count, triangle count, assumed units, and file-size reporting
 - Worker-built BVH acceleration for viewport raycasting and brush queries
-- One independent per-vertex selection mask stored outside React state
+- Independent per-vertex selection masks stored outside React state
 - On-surface painting with radius, hardness, strength, front-facing protection, and Alt-to-erase
 - Stroke-level undo and redo with mask deltas rather than project copies
-- One functional texture layer with selectable bundled height maps
-- Worker-generated triplanar height preview with mask-limited displacement, scale, midpoint, influence, inversion, and visibility controls
+- Ordered texture layers with add, duplicate, delete, rename, reorder, and visibility controls
+- Active-layer painting with independently retained masks and coverage
+- Bottom-to-top Add, Subtract, and Replace layer compositing
+- Worker-generated triplanar height preview with per-layer texture, scale, midpoint, amplitude, influence, inversion, and visibility controls
 - Central brand, copy, feature, theme-token, and sample-asset configuration
 - Local-only file registry that keeps `File` objects outside component state
 - WebGL 2 compatibility notice
 - Vitest and Playwright test foundations
 - GitHub Pages build and deployment workflow
 
-Not yet implemented: OBJ/GLB import, multiple editable layers, export-quality displacement, IndexedDB persistence, full mesh diagnostics, project packaging, or geometry export. The current worker-derived displacement is a nondestructive live preview; printable geometry is not yet generated.
+Not yet implemented: OBJ/GLB import, custom texture upload, export-quality displacement, IndexedDB persistence, full mesh diagnostics, project packaging, or geometry export. Layer-structure and parameter changes are not yet included in undo history, and selecting another layer starts a fresh stroke-history scope. The current worker-derived displacement is a nondestructive live preview; printable geometry is not yet generated.
 
 ## Requirements
 

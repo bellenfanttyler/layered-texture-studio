@@ -1,18 +1,32 @@
 import { useEffect } from "react";
 import {
   ArrowLeft,
+  ArrowDown,
+  ArrowUp,
   Box,
   Brush,
+  Copy,
+  Eye,
+  EyeOff,
   Layers3,
   LockKeyhole,
   MousePointer2,
   Orbit,
+  Plus,
   Redo2,
   Undo2,
+  Trash2,
 } from "lucide-react";
 import { useWelcomeStore } from "../app/store";
 import { copy } from "../config/copy";
 import { sampleTextures } from "../config/sampleAssets";
+import {
+  addLayer,
+  deleteActiveLayer,
+  duplicateActiveLayer,
+  moveActiveLayer,
+  selectLayer,
+} from "../layers/layerController";
 import { closeWorkspace } from "../mesh/modelImportController";
 import { redoMaskStroke, undoMaskStroke } from "../selection/maskCommands";
 import { formatBytes } from "../utils/fileSelection";
@@ -27,6 +41,7 @@ const formatCount = (value: number): string =>
 export function Workspace() {
   const model = useWelcomeStore((state) => state.loadedModel);
   const layer = useWelcomeStore((state) => state.activeLayer);
+  const layers = useWelcomeStore((state) => state.layers);
   const activeTool = useWelcomeStore((state) => state.activeTool);
   const setActiveTool = useWelcomeStore((state) => state.setActiveTool);
   const brushRadius = useWelcomeStore((state) => state.brushRadius);
@@ -38,6 +53,7 @@ export function Workspace() {
   const canUndo = useWelcomeStore((state) => state.canUndo);
   const canRedo = useWelcomeStore((state) => state.canRedo);
   const updateActiveLayer = useWelcomeStore((state) => state.updateActiveLayer);
+  const setLayers = useWelcomeStore((state) => state.setLayers);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -71,6 +87,7 @@ export function Workspace() {
   const activeTexture = sampleTextures.find(
     (texture) => texture.id === layer?.textureId,
   );
+  const activeLayerIndex = layers.findIndex((item) => item.id === layer?.id);
 
   return (
     <main className="workspace-main">
@@ -146,6 +163,139 @@ export function Workspace() {
               <p>{copy.workspace.sourceDetail}</p>
             </div>
           </div>
+
+          <section className="layer-panel" aria-labelledby="layers-heading">
+            <div className="layer-panel__heading">
+              <div>
+                <small>{copy.workspace.layerStack}</small>
+                <h3 id="layers-heading">{copy.workspace.layers}</h3>
+              </div>
+              <button type="button" onClick={addLayer}>
+                <Plus size={15} aria-hidden="true" />
+                {copy.workspace.addLayer}
+              </button>
+            </div>
+            <div className="layer-list">
+              {[...layers].reverse().map((item) => {
+                const texture = sampleTextures.find(
+                  (candidate) => candidate.id === item.textureId,
+                );
+                return (
+                  <div
+                    key={item.id}
+                    className={
+                      item.id === layer?.id
+                        ? "layer-row layer-row--active"
+                        : "layer-row"
+                    }
+                  >
+                    <button
+                      className="layer-row__main"
+                      type="button"
+                      aria-label={`${copy.workspace.selectLayer} ${item.name}`}
+                      aria-pressed={item.id === layer?.id}
+                      onClick={() => selectLayer(item.id)}
+                    >
+                      <img
+                        src={texture?.thumbnailUrl ?? texture?.imageUrl}
+                        alt=""
+                      />
+                      <span>
+                        <strong>{item.name}</strong>
+                        <small>
+                          {(item.coverage * 100).toFixed(1)}% &middot;{" "}
+                          {item.blendMode}
+                        </small>
+                      </span>
+                    </button>
+                    <button
+                      className="layer-row__visibility"
+                      type="button"
+                      aria-label={
+                        item.visible
+                          ? `${copy.workspace.hideLayer} ${item.name}`
+                          : `${copy.workspace.showLayer} ${item.name}`
+                      }
+                      onClick={() =>
+                        setLayers(
+                          layers.map((candidate) =>
+                            candidate.id === item.id
+                              ? { ...candidate, visible: !candidate.visible }
+                              : candidate,
+                          ),
+                          layer?.id ?? item.id,
+                        )
+                      }
+                    >
+                      {item.visible ? <Eye size={15} /> : <EyeOff size={15} />}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="layer-actions">
+              <button type="button" onClick={duplicateActiveLayer}>
+                <Copy size={14} /> {copy.workspace.duplicateLayer}
+              </button>
+              <button
+                type="button"
+                onClick={() => moveActiveLayer("up")}
+                disabled={activeLayerIndex === layers.length - 1}
+                aria-label={copy.workspace.moveLayerUp}
+              >
+                <ArrowUp size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={() => moveActiveLayer("down")}
+                disabled={activeLayerIndex <= 0}
+                aria-label={copy.workspace.moveLayerDown}
+              >
+                <ArrowDown size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={deleteActiveLayer}
+                disabled={layers.length <= 1}
+                aria-label={copy.workspace.deleteLayer}
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+            {layer && (
+              <div className="layer-properties">
+                <label>
+                  <span>{copy.workspace.layerName}</span>
+                  <input
+                    value={layer.name}
+                    onChange={(event) =>
+                      updateActiveLayer({ name: event.target.value })
+                    }
+                  />
+                </label>
+                <label>
+                  <span>{copy.workspace.blendMode}</span>
+                  <select
+                    value={layer.blendMode}
+                    onChange={(event) =>
+                      updateActiveLayer({
+                        blendMode: event.target.value as
+                          "add" | "subtract" | "replace",
+                      })
+                    }
+                  >
+                    <option value="add">{copy.workspace.blendAdd}</option>
+                    <option value="subtract">
+                      {copy.workspace.blendSubtract}
+                    </option>
+                    <option value="replace">
+                      {copy.workspace.blendReplace}
+                    </option>
+                  </select>
+                </label>
+              </div>
+            )}
+          </section>
 
           {layer && (
             <section

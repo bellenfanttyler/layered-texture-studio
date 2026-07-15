@@ -14,6 +14,7 @@ import {
   Quaternion,
   Vector3,
 } from "three";
+import { acceleratedRaycast } from "three-mesh-bvh";
 import { maskAssetManager } from "../assets/maskAssetManager";
 import { sourceMeshManager } from "../assets/sourceMeshManager";
 import { useWelcomeStore } from "../app/store";
@@ -41,6 +42,7 @@ function PaintCameraTarget({ active }: { active: boolean }) {
 
 interface PreviewMeshProps {
   model: LoadedModelSummary;
+  layers: MaskLayerSummary[];
   layer: MaskLayerSummary;
   onReady: () => void;
   onPending: () => void;
@@ -49,11 +51,13 @@ interface PreviewMeshProps {
 
 function PreviewMesh({
   model,
+  layers,
   layer,
   onReady,
   onPending,
   onError,
 }: PreviewMeshProps) {
+  const interactionRef = useRef<Mesh>(null);
   const cursorRef = useRef<Mesh>(null);
   const paintingRef = useRef(false);
   const strokeModeRef = useRef<"add" | "subtract">("add");
@@ -64,9 +68,6 @@ function PreviewMesh({
   const brushHardness = useWelcomeStore((state) => state.brushHardness);
   const brushStrength = useWelcomeStore((state) => state.brushStrength);
   const maskRevision = useWelcomeStore((state) => state.maskRevision);
-  const textureDefinition =
-    sampleTextures.find((texture) => texture.id === layer.textureId) ??
-    sampleTextures[0]!;
 
   const interactionGeometry = useMemo(() => {
     const nextGeometry = sourceMeshManager.createPreviewGeometry(
@@ -116,14 +117,27 @@ function PreviewMesh({
         {
           positions: source.positions.slice(),
           normals: source.normals.slice(),
-          maskWeights: maskAssetManager.get(layer.maskAssetId).weights.slice(),
-          textureUrl: textureDefinition.imageUrl,
-          textureScale: (layer.mappingScale * 4) / maximumDimension,
-          amplitude: layer.amplitude,
-          midpoint: layer.midpoint,
-          influence: layer.influence,
-          invert: layer.invert,
-          visible: layer.visible,
+          activeLayerId: layer.id,
+          layers: layers.map((item) => {
+            const texture =
+              sampleTextures.find(
+                (candidate) => candidate.id === item.textureId,
+              ) ?? sampleTextures[0]!;
+            return {
+              id: item.id,
+              maskWeights: maskAssetManager
+                .get(item.maskAssetId)
+                .weights.slice(),
+              textureUrl: texture.imageUrl,
+              textureScale: (item.mappingScale * 4) / maximumDimension,
+              amplitude: item.amplitude,
+              midpoint: item.midpoint,
+              influence: item.influence,
+              invert: item.invert,
+              visible: item.visible,
+              blendMode: item.blendMode,
+            };
+          }),
         },
         controller.signal,
       )
@@ -158,14 +172,11 @@ function PreviewMesh({
       controller.abort();
     };
   }, [
-    layer.amplitude,
     layer.displayColor,
-    layer.influence,
-    layer.invert,
-    layer.mappingScale,
+    layer.id,
     layer.maskAssetId,
-    layer.midpoint,
     layer.visible,
+    layers,
     invalidate,
     maskRevision,
     maximumDimension,
@@ -173,7 +184,6 @@ function PreviewMesh({
     onError,
     onPending,
     onReady,
-    textureDefinition.imageUrl,
     visualGeometry,
   ]);
 
@@ -181,16 +191,18 @@ function PreviewMesh({
     () => () => {
       interactionGeometry.boundsTree = undefined;
       interactionGeometry.dispose();
-      visualGeometry.dispose();
     },
-    [interactionGeometry, visualGeometry],
+    [interactionGeometry],
   );
+  useEffect(() => () => visualGeometry.dispose(), [visualGeometry]);
 
   const resolvePointer = (event: ThreeEvent<PointerEvent>) => {
-    if (!event.face) return null;
-    const point = event.object.worldToLocal(event.point.clone());
+    if (!event.face || !interactionRef.current) return null;
+    const point = interactionRef.current.worldToLocal(event.point.clone());
     const normal = event.face.normal.clone().normalize();
-    const cameraPosition = event.object.worldToLocal(camera.position.clone());
+    const cameraPosition = interactionRef.current.worldToLocal(
+      camera.position.clone(),
+    );
     return { point, normal, cameraPosition };
   };
 
@@ -283,8 +295,9 @@ function PreviewMesh({
   return (
     <group position={[-model.center.x, -model.center.y, -model.center.z]}>
       <mesh
-        geometry={visualGeometry}
-        receiveShadow
+        ref={interactionRef}
+        geometry={interactionGeometry}
+        raycast={acceleratedRaycast}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={finishStroke}
@@ -294,6 +307,14 @@ function PreviewMesh({
             cursorRef.current.visible = false;
         }}
       >
+        <meshBasicMaterial
+          transparent
+          opacity={0}
+          colorWrite={false}
+          depthWrite={false}
+        />
+      </mesh>
+      <mesh geometry={visualGeometry} receiveShadow raycast={() => null}>
         <meshStandardMaterial vertexColors roughness={0.68} metalness={0.04} />
       </mesh>
       <mesh ref={cursorRef} visible={false} renderOrder={10}>
@@ -325,6 +346,7 @@ export function ModelViewport({ model }: { model: LoadedModelSummary }) {
     setPreviewReady(false);
   }, []);
   const layer = useWelcomeStore((state) => state.activeLayer);
+  const layers = useWelcomeStore((state) => state.layers);
   const activeTool = useWelcomeStore((state) => state.activeTool);
   const maximumDimension = Math.max(
     model.dimensions.width,
@@ -375,6 +397,7 @@ export function ModelViewport({ model }: { model: LoadedModelSummary }) {
         />
         <PreviewMesh
           model={model}
+          layers={layers}
           layer={layer}
           onReady={markPreviewReady}
           onPending={markPreviewPending}

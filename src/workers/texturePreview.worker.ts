@@ -1,7 +1,9 @@
 /// <reference lib="webworker" />
 
 import { calculateTriplanarWeights } from "../textures/triplanar";
+import { combineLayerDisplacement } from "../textures/layerCompositing";
 import type {
+  TexturePreviewLayerRequest,
   TexturePreviewRequest,
   TexturePreviewWorkerResponse,
 } from "../textures/texturePreview.types";
@@ -21,10 +23,10 @@ const sampleChannel = (
   return (pixels[(y * width + x) * 4] ?? 0) / 255;
 };
 
-const buildPreview = async (
-  request: TexturePreviewRequest,
-): Promise<TexturePreviewWorkerResponse> => {
-  const response = await fetch(request.textureUrl);
+const loadTexturePixels = async (
+  textureUrl: string,
+): Promise<Uint8ClampedArray> => {
+  const response = await fetch(textureUrl);
   if (!response.ok)
     throw new Error(`Texture request failed (${response.status}).`);
   const bitmap = await createImageBitmap(await response.blob(), {
@@ -37,11 +39,87 @@ const buildPreview = async (
   if (!context) throw new Error("Texture pixels could not be read.");
   context.drawImage(bitmap, 0, 0, previewSize, previewSize);
   bitmap.close();
-  const pixels = context.getImageData(0, 0, previewSize, previewSize).data;
-  const positions = request.positions;
-  const heights = new Float32Array(request.maskWeights.length);
+  return context.getImageData(0, 0, previewSize, previewSize).data;
+};
 
-  for (let index = 0; index < request.maskWeights.length; index += 1) {
+const sampleLayer = (
+  layer: TexturePreviewLayerRequest,
+  positions: Float32Array,
+  normals: Float32Array,
+  pixels: Uint8ClampedArray,
+): Float32Array => {
+  const heights = new Float32Array(layer.maskWeights.length);
+  for (let index = 0; index < layer.maskWeights.length; index += 1) {
+    const offset = index * 3;
+    const x = positions[offset] ?? 0;
+    const y = positions[offset + 1] ?? 0;
+    const z = positions[offset + 2] ?? 0;
+    const weights = calculateTriplanarWeights({
+      x: normals[offset] ?? 0,
+      y: normals[offset + 1] ?? 0,
+      z: normals[offset + 2] ?? 0,
+    });
+    const scale = layer.textureScale;
+    let value =
+      sampleChannel(pixels, previewSize, previewSize, y * scale, z * scale) *
+        weights.x +
+      sampleChannel(pixels, previewSize, previewSize, x * scale, z * scale) *
+        weights.y +
+      sampleChannel(pixels, previewSize, previewSize, x * scale, y * scale) *
+        weights.z;
+    if (layer.invert) value = 1 - value;
+    heights[index] = value;
+  }
+  return heights;
+};
+
+const buildPreview = async (
+  request: TexturePreviewRequest,
+): Promise<TexturePreviewWorkerResponse> => {
+  const positions = request.positions;
+  const pixelRequests = new Map<string, Promise<Uint8ClampedArray>>();
+  const getPixels = (url: string): Promise<Uint8ClampedArray> => {
+    const existing = pixelRequests.get(url);
+    if (existing) return existing;
+    const pending = loadTexturePixels(url);
+    pixelRequests.set(url, pending);
+    return pending;
+  };
+  const sampledLayers = await Promise.all(
+    request.layers.map(async (layer) => ({
+      layer,
+      heights: sampleLayer(
+        layer,
+        positions,
+        request.normals,
+        await getPixels(layer.textureUrl),
+      ),
+    })),
+  );
+  const activeHeights =
+    sampledLayers.find(({ layer }) => layer.id === request.activeLayerId)
+      ?.heights ?? new Float32Array(positions.length / 3);
+  const displacement = new Float32Array(positions.length / 3);
+
+  for (const { layer, heights } of sampledLayers) {
+    if (!layer.visible) continue;
+    for (let index = 0; index < layer.maskWeights.length; index += 1) {
+      const mask = layer.maskWeights[index] ?? 0;
+      const layerDisplacement =
+        ((heights[index] ?? 0.5) - layer.midpoint) *
+        layer.amplitude *
+        layer.influence *
+        mask;
+      displacement[index] = combineLayerDisplacement(
+        displacement[index] ?? 0,
+        layerDisplacement,
+        mask,
+        layer.blendMode,
+      );
+    }
+  }
+
+  for (let index = 0; index < displacement.length; index += 1) {
     const offset = index * 3;
     const x = positions[offset] ?? 0;
     const y = positions[offset + 1] ?? 0;
@@ -49,29 +127,13 @@ const buildPreview = async (
     const nx = request.normals[offset] ?? 0;
     const ny = request.normals[offset + 1] ?? 0;
     const nz = request.normals[offset + 2] ?? 0;
-    const weights = calculateTriplanarWeights({ x: nx, y: ny, z: nz });
-    const scale = request.textureScale;
-    let heightValue =
-      sampleChannel(pixels, previewSize, previewSize, y * scale, z * scale) *
-        weights.x +
-      sampleChannel(pixels, previewSize, previewSize, x * scale, z * scale) *
-        weights.y +
-      sampleChannel(pixels, previewSize, previewSize, x * scale, y * scale) *
-        weights.z;
-    if (request.invert) heightValue = 1 - heightValue;
-    heights[index] = heightValue;
-    const displacement = request.visible
-      ? (heightValue - request.midpoint) *
-        request.amplitude *
-        request.influence *
-        (request.maskWeights[index] ?? 0)
-      : 0;
-    positions[offset] = x + nx * displacement;
-    positions[offset + 1] = y + ny * displacement;
-    positions[offset + 2] = z + nz * displacement;
+    const amount = displacement[index] ?? 0;
+    positions[offset] = x + nx * amount;
+    positions[offset + 1] = y + ny * amount;
+    positions[offset + 2] = z + nz * amount;
   }
 
-  return { type: "result", result: { positions, heights } };
+  return { type: "result", result: { positions, heights: activeHeights } };
 };
 
 self.onmessage = (event: MessageEvent<TexturePreviewRequest>) => {

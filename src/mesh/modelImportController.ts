@@ -43,11 +43,13 @@ const runImport = async (
 
     const previousAssetId =
       useWelcomeStore.getState().loadedModel?.sourceAssetId;
-    const previousMaskId = useWelcomeStore.getState().activeLayer?.maskAssetId;
+    const previousLayers = useWelcomeStore.getState().layers;
     const sourceAssetId = sourceMeshManager.register(parsed);
     const maskAssetId = maskAssetManager.create(parsed.vertexCount);
     if (previousAssetId) sourceMeshManager.remove(previousAssetId);
-    if (previousMaskId) maskAssetManager.remove(previousMaskId);
+    previousLayers.forEach((layer) =>
+      maskAssetManager.remove(layer.maskAssetId),
+    );
     maskStrokeHistory.clear();
     const initialTexture =
       sampleTextures.find((texture) =>
@@ -90,6 +92,7 @@ const runImport = async (
         midpoint: 0.5,
         influence: 1,
         invert: false,
+        blendMode: "add",
       },
     );
   } catch (error) {
@@ -147,10 +150,10 @@ export const cancelModelImport = (): void => {
 };
 
 export const closeWorkspace = (): void => {
-  const assetId = useWelcomeStore.getState().loadedModel?.sourceAssetId;
-  const maskAssetId = useWelcomeStore.getState().activeLayer?.maskAssetId;
+  const state = useWelcomeStore.getState();
+  const assetId = state.loadedModel?.sourceAssetId;
   if (assetId) sourceMeshManager.remove(assetId);
-  if (maskAssetId) maskAssetManager.remove(maskAssetId);
+  state.layers.forEach((layer) => maskAssetManager.remove(layer.maskAssetId));
   maskStrokeHistory.clear();
   useWelcomeStore.getState().returnToWelcome();
 };
