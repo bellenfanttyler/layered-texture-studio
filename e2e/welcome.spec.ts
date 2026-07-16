@@ -79,6 +79,17 @@ test("a visitor can paint a textured surface selection", async ({ page }) => {
     page.getByRole("checkbox", { name: "Invert height" }),
   ).toBeChecked();
 
+  await page
+    .locator('input[type="file"][accept*="image/png"]')
+    .setInputFiles("public/samples/textures/TIL_014_4K_Height_01.png");
+  await expect(
+    page.getByText("TIL_014_4K_Height_01", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText(/Local texture · \d+×\d+px/)).toBeVisible();
+  await expect(viewport).toHaveAttribute("data-preview-ready", "true", {
+    timeout: 15_000,
+  });
+
   await page.getByRole("button", { name: "Add layer" }).click();
   await expect(page.getByLabel("Layer name")).toHaveValue("Texture Layer 2");
   await expect(viewport).toHaveAttribute("data-preview-ready", "true", {

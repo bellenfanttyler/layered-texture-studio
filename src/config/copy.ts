@@ -21,9 +21,10 @@ export const copy = {
     selectionReady: "Sample setup ready",
     openSample: "Open sample model",
     openLocal: "Open selected model",
-    privacy: "Your files stay on this device. Nothing is uploaded.",
+    privacy:
+      "Your files stay on this device. Nothing is uploaded, and the workspace is discarded when this page closes or reloads.",
     initializationNote:
-      "STL viewing, surface painting, and texture preview are available. Project saving and printable geometry export remain hidden until those workflows are complete.",
+      "STL viewing, surface painting, and texture preview are available. Printable geometry export remains hidden until that workflow is complete.",
     compatibilityTitle: "WebGL 2 is unavailable.",
     compatibilityDetail:
       "Model preview requires a recent browser with hardware acceleration enabled.",
@@ -81,6 +82,11 @@ export const copy = {
     textureHeading: "Height texture",
     textureDetail:
       "Texture height is projected from three axes and blended across curved surfaces.",
+    importTexture: "Import height texture",
+    importingTexture: "Reading texture...",
+    importTextureHint: "PNG, JPEG, or WebP · local only",
+    textureImportFailed: "The texture could not be imported.",
+    localTexture: "Local texture",
     mappingScale: "Texture scale",
     amplitude: "Amplitude",
     midpoint: "Zero height",

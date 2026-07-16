@@ -17,10 +17,11 @@ Implemented so far:
 - Worker-built BVH acceleration for viewport raycasting and brush queries
 - Independent per-vertex selection masks stored outside React state
 - On-surface painting with radius, hardness, strength, front-facing protection, and Alt-to-erase
-- Stroke-level undo and redo with mask deltas rather than project copies
+- Stroke-level undo and redo with mask deltas rather than workspace copies
 - Ordered texture layers with add, duplicate, delete, rename, reorder, and visibility controls
 - Active-layer painting with independently retained masks and coverage
 - Bottom-to-top Add, Subtract, and Replace layer compositing
+- Local PNG, JPEG, and WebP height-texture import with decode validation and explicit object-URL cleanup
 - Worker-generated triplanar height preview with per-layer texture, scale, midpoint, amplitude, influence, inversion, and visibility controls
 - Central brand, copy, feature, theme-token, and sample-asset configuration
 - Local-only file registry that keeps `File` objects outside component state
@@ -28,7 +29,7 @@ Implemented so far:
 - Vitest and Playwright test foundations
 - GitHub Pages build and deployment workflow
 
-Not yet implemented: OBJ/GLB import, custom texture upload, export-quality displacement, IndexedDB persistence, full mesh diagnostics, project packaging, or geometry export. Layer-structure and parameter changes are not yet included in undo history, and selecting another layer starts a fresh stroke-history scope. The current worker-derived displacement is a nondestructive live preview; printable geometry is not yet generated.
+Not yet implemented: OBJ/GLB import, export-quality displacement, full mesh diagnostics, or geometry export. Project persistence is intentionally out of scope, so reloading or closing the page discards the workspace. Layer-structure and parameter changes are not yet included in undo history, and selecting another layer starts a fresh stroke-history scope. The current worker-derived displacement is a nondestructive live preview; printable geometry is not yet generated.
 
 ## Requirements
 

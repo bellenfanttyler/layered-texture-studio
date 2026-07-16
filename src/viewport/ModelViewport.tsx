@@ -20,7 +20,6 @@ import { sourceMeshManager } from "../assets/sourceMeshManager";
 import { useWelcomeStore } from "../app/store";
 import { brand } from "../config/brand";
 import { copy } from "../config/copy";
-import { sampleTextures } from "../config/sampleAssets";
 import { maskStrokeHistory } from "../history/maskStrokeHistory";
 import { applyBrushSample } from "../selection/applyBrushSample";
 import { commitMaskStroke } from "../selection/maskCommands";
@@ -29,6 +28,7 @@ import {
   updateTexturePreviewColors,
 } from "../selection/maskColors";
 import { createTexturePreview } from "../textures/createTexturePreview";
+import { getTextureSource } from "../textures/textureCatalog";
 import type { LoadedModelSummary, MaskLayerSummary } from "../types/mesh";
 
 const zAxis = new Vector3(0, 0, 1);
@@ -119,10 +119,9 @@ function PreviewMesh({
           normals: source.normals.slice(),
           activeLayerId: layer.id,
           layers: layers.map((item) => {
-            const texture =
-              sampleTextures.find(
-                (candidate) => candidate.id === item.textureId,
-              ) ?? sampleTextures[0]!;
+            const texture = getTextureSource(item.textureId);
+            if (!texture)
+              throw new Error("A layer texture is no longer available.");
             return {
               id: item.id,
               maskWeights: maskAssetManager

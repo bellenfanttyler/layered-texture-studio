@@ -30,8 +30,6 @@ export interface BrandConfig {
   };
   copyrightText: string;
   poweredBy?: string;
-  defaultProjectName: string;
-  projectExtension: string;
   exportFilenamePrefix: string;
   analyticsEnabled: boolean;
 }
@@ -92,8 +90,6 @@ export const brand: BrandConfig = {
   },
   copyrightText: `© ${new Date().getFullYear()} ${envString(import.meta.env.VITE_COMPANY_NAME, brandDefaults.companyName)}`,
   poweredBy: optionalEnvString(import.meta.env.VITE_POWERED_BY),
-  defaultProjectName: "Untitled surface",
-  projectExtension: ".l3ts",
   exportFilenamePrefix: "layered-texture",
   analyticsEnabled: false,
 };

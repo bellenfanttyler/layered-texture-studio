@@ -1,7 +1,7 @@
 # Layered 3D Texture Studio
 ## Full Product Requirements and Implementation Brief
 
-**Purpose:** A one-shot implementation brief for building a standalone, white-label-ready browser application that lets users import a 3D mesh, paint selections directly on its surface, apply multiple displacement textures through independent layers, preview the composite result, save editable projects locally, and export printable geometry.
+**Purpose:** A one-shot implementation brief for building a standalone, white-label-ready browser application that lets users import a 3D mesh, paint selections directly on its surface, apply multiple displacement textures through independent layers, preview the composite result, and export printable geometry.
 
 **Deployment target:** Static GitHub Pages site. No backend, login, account, API key, cloud processing, or required server-side service.
 
@@ -9,13 +9,13 @@
 
 ## 1. Product vision
 
-Build a polished browser application called **Layered 3D Texture Studio**. It should retain the approachable upload-adjust-preview-export workflow of lightweight texture-displacement tools, while adding direct surface selection, nondestructive masks, multiple independently editable texture layers, stronger mesh diagnostics, local project persistence, safer displacement controls, and robust export.
+Build a polished browser application called **Layered 3D Texture Studio**. It should retain the approachable upload-adjust-preview-export workflow of lightweight texture-displacement tools, while adding direct surface selection, nondestructive masks, multiple independently editable texture layers, stronger mesh diagnostics, safer displacement controls, and robust export.
 
 The product should feel accessible to a product designer, engineer, maker, or 3D-printing user who does not know Blender. It must still provide enough precision and feedback to support real fabrication workflows.
 
 ### Primary user outcome
 
-A first-time user can import a model, paint two different regions, apply two different textures on separate layers, preview their combined displacement, save the editable project locally, and export the final textured STL without creating an account or using desktop software.
+A first-time user can import a model, paint two different regions, apply two different textures on separate layers, preview their combined displacement, and export the final textured STL without creating an account or using desktop software.
 
 ### Core workflow
 
@@ -28,7 +28,6 @@ A first-time user can import a model, paint two different regions, apply two dif
 7. Add more layers for different textures or overlapping effects.
 8. Preview the final composite.
 9. Validate and export a printable mesh.
-10. Save or reopen the editable project locally.
 
 ---
 
@@ -43,7 +42,7 @@ A first-time user can import a model, paint two different regions, apply two dif
 7. **Fabrication-aware:** The app warns about mesh density, hard mask boundaries, excessive displacement, non-manifold geometry, and output size.
 8. **White-label ready:** Product identity, colors, copy, assets, metadata, links, and feature flags are configuration-driven.
 9. **No placeholders:** Do not expose unfinished controls or buttons.
-10. **Polished core over broad fragility:** Reliable painting, layers, project persistence, and export take priority over secondary features.
+10. **Polished core over broad fragility:** Reliable painting, layers, and export take priority over secondary features.
 
 ---
 
@@ -79,8 +78,6 @@ Do not copy Formlabs branding, source code, proprietary assets, exact layout, or
 - three-mesh-bvh for accelerated raycasting
 - Zustand for application state
 - Web Workers with Comlink or typed message protocols
-- Dexie / IndexedDB for autosave and local projects
-- JSZip for packaged project files
 - Lucide React for icons
 - Vitest for unit and integration tests
 - Playwright for critical end-to-end flows
@@ -98,15 +95,13 @@ Create a full-height, desktop-first application shell.
 Include:
 
 - Configurable logo and product name
-- New Project
-- Open Model / Project
-- Save Project
-- Export Project
+- New Workspace
+- Open Model
+- Export Mesh
 - Undo / Redo
 - Help
 - Theme toggle
 - Model name
-- Unsaved-state indicator
 - Mesh status indicator
 - Primary Final Export button
 
@@ -175,7 +170,7 @@ Before a model is loaded, show:
 - Large drag-and-drop target
 - Open 3D Model button
 - Supported formats
-- Try Sample Project button
+- Try Sample Model button
 - Three-step explanation: Import, Paint and Layer, Export
 - Privacy statement: “Your files stay on this device.”
 
@@ -585,33 +580,13 @@ Never silently apply destructive repair. Show proposed changes and a pre-export 
 
 Use a command-based history system. Undoable actions include strokes, mask commands, layer changes, mapping transforms, texture changes, merges, and repair operations.
 
-A slider drag creates one history entry on completion. Maintain at least 50 practical entries, subject to memory. Store mask deltas or changed-index ranges instead of full project copies. Warn when history is truncated due to memory pressure.
+A slider drag creates one history entry on completion. Maintain at least 50 practical entries, subject to memory. Store mask deltas or changed-index ranges instead of full workspace copies. Warn when history is truncated due to memory pressure.
 
 ---
 
-## 21. Project persistence
+## 21. Session lifecycle
 
-### Autosave
-
-Use IndexedDB. Autosave after completed strokes, layer changes, debounced parameter edits, model import, and texture import. Show Saving, Saved locally, and Autosave failed states. Do not persist disposable preview meshes that can be regenerated.
-
-### Portable project file
-
-Use an extension such as `.l3ts` and package a ZIP containing:
-
-- project.json
-- Original mesh
-- Imported textures
-- Procedural definitions
-- Compressed layer masks
-- Version metadata
-- Optional preview thumbnail
-
-Restore model, camera, layers, masks, mapping, display state, units, and export settings. Include a schema version and migration mechanism.
-
-### Local project browser
-
-Show thumbnail, name, last modified, dimensions, layer count, and size estimate. Allow rename and delete with confirmation.
+Project persistence, autosave, portable project files, and a local project browser are intentionally out of scope. Imported models, textures, masks, and editing state exist only for the active browser session. Clearly communicate that closing or reloading the page discards the workspace. Release object URLs, typed arrays, workers, and Three.js resources when assets are replaced or the workspace closes.
 
 ---
 
@@ -634,7 +609,6 @@ Show thumbnail, name, last modified, dimensions, layer count, and size estimate.
 - Active layer only
 - Visible layers only
 - Mask data
-- Project file
 
 ### Export dialog
 
@@ -685,7 +659,7 @@ Collapsible panels, larger targets, two-finger orbit, one-finger painting in pai
 
 ### Phone
 
-At minimum, allow project viewing, orbit, and layer visibility, while explaining that full editing is designed for desktop/tablet. Do not force the complete desktop interface into an unusable mobile layout.
+At minimum, allow workspace viewing, orbit, and layer visibility, while explaining that full editing is designed for desktop/tablet. Do not force the complete desktop interface into an unusable mobile layout.
 
 ---
 
@@ -727,8 +701,7 @@ Create a typed `src/config/brand.ts` with fields for:
 - support, documentation, privacy, and terms links
 - copyright text
 - optional powered-by attribution
-- default project name
-- project extension
+- default workspace name
 - analytics flag, default false
 
 No component may hardcode the product name, company name, brand colors, logo path, support address, legal copy, or download prefix.
@@ -757,7 +730,7 @@ Store interface terminology, welcome text, help copy, empty states, and privacy 
 
 ### 27.5 Feature flags
 
-Create a typed configuration allowing optional visibility of light theme, procedural textures, local project library, import formats, advanced selection, repair, sample projects, help links, and other secondary features. Disabled features disappear cleanly without empty panels or broken menus.
+Create a typed configuration allowing optional visibility of light theme, procedural textures, import formats, advanced selection, repair, sample models, help links, and other secondary features. Disabled features disappear cleanly without empty panels or broken menus.
 
 ### 27.6 Build-time overrides
 
@@ -774,7 +747,7 @@ Environment variables override defaults but are not required for local developme
 
 ### 27.7 Metadata and deployment identity
 
-Brand configuration controls browser title, meta description, favicon, Open Graph metadata, web manifest, theme color, project filename prefix, and exported mesh filename.
+Brand configuration controls browser title, meta description, favicon, Open Graph metadata, web manifest, theme color, and exported mesh filename.
 
 Allow configuration of GitHub Pages base path, custom domain, links, attribution, samples, and default theme.
 
@@ -787,7 +760,7 @@ Provide `WHITE_LABELING.md` explaining how to replace names, logos, favicon, col
 1. One config change updates the product name everywhere.
 2. Replacing `public/brand` assets updates logo, compact logo, favicon, and social preview.
 3. Theme-token changes update the whole interface.
-4. No old name remains in dialogs, metadata, downloads, help, or project defaults.
+4. No old name remains in dialogs, metadata, downloads, help, or workspace defaults.
 5. Attribution is optional.
 6. Support/legal links can be replaced or hidden.
 7. A second branded build requires no edits to React components or mesh modules.
@@ -796,17 +769,13 @@ Provide `WHITE_LABELING.md` explaining how to replace names, logos, favicon, col
 
 ## 28. Application state and architecture
 
-Use normalized state and separate UI state, project state, binary assets, render caches, undo history, and worker state.
+Use normalized state and separate UI state, workspace state, binary assets, render caches, undo history, and worker state.
 
 Suggested types:
 
 ```ts
-interface ProjectState {
-  schemaVersion: number;
-  projectId: string;
+interface WorkspaceState {
   name: string;
-  createdAt: string;
-  updatedAt: string;
   model: ModelState | null;
   layers: TextureLayer[];
   activeLayerId: string | null;
@@ -845,7 +814,6 @@ src/
   textures/
   mesh/
   workers/
-  persistence/
   history/
   config/
   hooks/
@@ -902,8 +870,7 @@ Default to smoothed source vertex normals. Advanced alternatives may include fac
 - Shift + [ / ] Brush hardness
 - Ctrl/Cmd + Z Undo
 - Ctrl/Cmd + Shift + Z Redo
-- Ctrl/Cmd + S Save
-- Ctrl/Cmd + O Open
+- Ctrl/Cmd + O Open model
 - Ctrl/Cmd + E Export
 - Delete Contextual delete/clear
 - Escape Cancel
@@ -950,12 +917,10 @@ Displacement inputs should combine slider, numeric field, unit, reset, and fine 
 - Custom image upload
 - Live composite preview
 - Undo/redo
-- IndexedDB autosave
-- Portable project import/export
 - Binary STL export
 - Mesh diagnostics
 - Worker-based progress and cancellation
-- Sample model/project
+- Sample model
 - GitHub Pages workflow
 - Critical automated tests
 - White-label configuration and documentation
@@ -971,7 +936,6 @@ Displacement inputs should combine slider, numeric field, unit, reset, and fine 
 - Procedural textures
 - Overlap visualization
 - Export validation
-- Local project browser
 
 ### Future-ready extension points
 
@@ -1004,9 +968,9 @@ Apply leather on Layer A and diamond grip on Layer B in separate areas. Confirm 
 
 Paint, erase, undo, redo, smooth edge, and confirm a gradual displacement transition.
 
-### D. Persistence
+### D. Custom texture
 
-Create two layers, paint both, upload a custom texture, save, reload, reopen, and confirm model, texture, masks, order, settings, and camera state.
+Create two layers, paint both, upload a custom PNG, JPEG, or WebP texture, and confirm it remains local, previews correctly, and can be replaced without affecting the other layer.
 
 ### E. Long operation
 
@@ -1033,25 +997,24 @@ Change the brand config and assets, build again, and verify that names, colors, 
 - Triplanar weights
 - Displacement calculations
 - Unit conversion
-- Project serialization/migration
 - Undo delta application
 - Export validation
 - Brand config resolution and environment overrides
 
 ### Integration tests
 
-- Import creates project state
+- Import creates workspace state
 - Painting changes only active layer
 - Locked layers remain unchanged
 - Reorder changes composite output
-- Save/restore retains masks
+- Texture replacement preserves unrelated layer masks
 - Worker cancellation cleans up
 - Deleted GPU/resources are disposed
 - Feature flags remove UI cleanly
 
 ### End-to-end tests
 
-Use Playwright to open a sample, add a layer, choose texture, simulate painting where practical, save/restore, initiate STL export, verify download, and load a second white-label configuration.
+Use Playwright to open a sample, add a layer, import a custom texture, simulate painting where practical, initiate STL export, verify download, and load a second white-label configuration.
 
 ---
 
@@ -1101,21 +1064,20 @@ Configure Vite base paths correctly. Include a GitHub Actions flow that checks o
 
 ## 37. Quality bar and implementation priority
 
-The result must not be a crude prototype. It must have a coherent visual system, reliable painting, clear active-layer behavior, responsive processing, useful errors, working persistence, working export, no model-data transmission, no placeholder controls, and no obvious console errors.
+The result must not be a crude prototype. It must have a coherent visual system, reliable painting, clear active-layer behavior, responsive processing, useful errors, working export, no model-data transmission, no placeholder controls, and no obvious console errors.
 
 When tradeoffs are necessary, prioritize:
 
-1. Source-mesh and project data integrity
+1. Source-mesh and workspace data integrity
 2. Correct per-layer masks
 3. Reliable surface painting
 4. Correct layer compositing
 5. Responsive viewport
 6. Accurate export
-7. Save and restore
-8. Diagnostics and safety warnings
-9. Secondary selection tools
-10. Advanced mapping
-11. Cosmetic enhancements
+7. Diagnostics and safety warnings
+8. Secondary selection tools
+9. Advanced mapping
+10. Cosmetic enhancements
 
 Do not sacrifice mask integrity or export correctness merely to make previews faster.
 
@@ -1135,8 +1097,6 @@ The product is done when a new user can:
 - Adjust per-layer displacement and mapping
 - Understand overlap behavior
 - Undo and redo edits
-- Save locally and export a portable project
-- Reload and restore the editable state
 - Validate and export a printable STL
 - Rebrand the app using configuration and replaceable assets only
 

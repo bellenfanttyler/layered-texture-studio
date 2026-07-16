@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowLeft,
   ArrowDown,
@@ -8,6 +8,7 @@ import {
   Copy,
   Eye,
   EyeOff,
+  ImagePlus,
   Layers3,
   LockKeyhole,
   MousePointer2,
@@ -29,6 +30,11 @@ import {
 } from "../layers/layerController";
 import { closeWorkspace } from "../mesh/modelImportController";
 import { redoMaskStroke, undoMaskStroke } from "../selection/maskCommands";
+import { getTextureSource } from "../textures/textureCatalog";
+import {
+  assignTextureToActiveLayer,
+  importTextureForActiveLayer,
+} from "../textures/textureController";
 import { formatBytes } from "../utils/fileSelection";
 import { ModelViewport } from "../viewport/ModelViewport";
 
@@ -39,6 +45,10 @@ const formatCount = (value: number): string =>
   new Intl.NumberFormat().format(value);
 
 export function Workspace() {
+  const [textureImportError, setTextureImportError] = useState<string | null>(
+    null,
+  );
+  const [isImportingTexture, setIsImportingTexture] = useState(false);
   const model = useWelcomeStore((state) => state.loadedModel);
   const layer = useWelcomeStore((state) => state.activeLayer);
   const layers = useWelcomeStore((state) => state.layers);
@@ -84,9 +94,7 @@ export function Workspace() {
     1,
   );
 
-  const activeTexture = sampleTextures.find(
-    (texture) => texture.id === layer?.textureId,
-  );
+  const activeTexture = layer ? getTextureSource(layer.textureId) : undefined;
   const activeLayerIndex = layers.findIndex((item) => item.id === layer?.id);
 
   return (
@@ -177,9 +185,7 @@ export function Workspace() {
             </div>
             <div className="layer-list">
               {[...layers].reverse().map((item) => {
-                const texture = sampleTextures.find(
-                  (candidate) => candidate.id === item.textureId,
-                );
+                const texture = getTextureSource(item.textureId);
                 return (
                   <div
                     key={item.id}
@@ -409,16 +415,10 @@ export function Workspace() {
                     type="button"
                     aria-pressed={texture.id === layer.textureId}
                     aria-label={texture.name}
-                    onClick={() =>
-                      updateActiveLayer({
-                        textureId: texture.id,
-                        mappingScale: texture.defaultScale,
-                        amplitude: Math.min(
-                          texture.defaultAmplitude,
-                          maximumDimension * 0.05,
-                        ),
-                      })
-                    }
+                    onClick={() => {
+                      setTextureImportError(null);
+                      assignTextureToActiveLayer(texture.id);
+                    }}
                   >
                     <img
                       src={texture.thumbnailUrl ?? texture.imageUrl}
@@ -428,6 +428,49 @@ export function Workspace() {
                   </button>
                 ))}
               </div>
+              <label className="texture-import">
+                <ImagePlus size={16} aria-hidden="true" />
+                <span>
+                  <strong>
+                    {isImportingTexture
+                      ? copy.workspace.importingTexture
+                      : copy.workspace.importTexture}
+                  </strong>
+                  <small>{copy.workspace.importTextureHint}</small>
+                </span>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp"
+                  disabled={isImportingTexture}
+                  onChange={(event) => {
+                    const file = event.currentTarget.files?.[0];
+                    event.currentTarget.value = "";
+                    if (!file) return;
+                    setTextureImportError(null);
+                    setIsImportingTexture(true);
+                    void importTextureForActiveLayer(file)
+                      .catch((error: unknown) =>
+                        setTextureImportError(
+                          error instanceof Error
+                            ? error.message
+                            : copy.workspace.textureImportFailed,
+                        ),
+                      )
+                      .finally(() => setIsImportingTexture(false));
+                  }}
+                />
+              </label>
+              {activeTexture.kind === "local" && (
+                <p className="texture-local-detail">
+                  {copy.workspace.localTexture} &middot; {activeTexture.width}
+                  &times;{activeTexture.height}px
+                </p>
+              )}
+              {textureImportError && (
+                <p className="texture-import-error" role="alert">
+                  {textureImportError}
+                </p>
+              )}
               <p>{copy.workspace.textureDetail}</p>
               <label className="brush-control">
                 <span>

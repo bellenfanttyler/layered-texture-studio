@@ -1427,6 +1427,61 @@ main {
   white-space: nowrap;
 }
 
+.texture-import {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  padding: 0.65rem;
+  cursor: pointer;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.texture-import:hover,
+.texture-import:focus-within {
+  border-color: var(--brand-primary);
+  background: var(--brand-wash);
+}
+
+.texture-import > span {
+  display: grid;
+  gap: 2px;
+}
+
+.texture-import strong {
+  font-size: 0.68rem;
+}
+
+.texture-import small {
+  color: var(--text-muted);
+  font-size: 0.56rem;
+}
+
+.texture-import input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.texture-panel > .texture-local-detail {
+  margin-top: var(--space-2);
+  color: var(--brand-primary);
+  font-family: var(--font-mono);
+}
+
+.texture-panel > .texture-import-error {
+  color: var(--brand-danger);
+}
+
 .texture-toggles {
   display: grid;
   gap: var(--space-2);

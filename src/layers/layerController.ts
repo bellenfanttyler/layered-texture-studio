@@ -4,6 +4,8 @@ import { brand } from "../config/brand";
 import { copy } from "../config/copy";
 import { sampleTextures } from "../config/sampleAssets";
 import { maskStrokeHistory } from "../history/maskStrokeHistory";
+import { getTextureSource } from "../textures/textureCatalog";
+import { releaseLayerTexture } from "../textures/textureController";
 import type { MaskLayerSummary } from "../types/mesh";
 
 const layerColors = [brand.colors.primary, brand.colors.accent];
@@ -30,7 +32,7 @@ export const addLayer = (): void => {
   if (!model) return;
   const template = state.activeLayer;
   const texture =
-    sampleTextures.find((item) => item.id === template?.textureId) ??
+    (template ? getTextureSource(template.textureId) : undefined) ??
     sampleTextures[0];
   if (!texture) return;
   const number = nextLayerNumber(state.layers);
@@ -83,6 +85,7 @@ export const deleteActiveLayer = (): void => {
   maskAssetManager.remove(active.maskAssetId);
   resetStrokeHistory();
   state.setLayers(layers, nextActive.id);
+  releaseLayerTexture(active.textureId, layers);
 };
 
 export const moveActiveLayer = (direction: "up" | "down"): void => {

@@ -1,4 +1,5 @@
 import { getLocalModel } from "../assets/localFileRegistry";
+import { localTextureManager } from "../assets/localTextureManager";
 import { maskAssetManager } from "../assets/maskAssetManager";
 import { sourceMeshManager } from "../assets/sourceMeshManager";
 import { useWelcomeStore, type LocalModelSelection } from "../app/store";
@@ -50,6 +51,7 @@ const runImport = async (
     previousLayers.forEach((layer) =>
       maskAssetManager.remove(layer.maskAssetId),
     );
+    localTextureManager.clear();
     maskStrokeHistory.clear();
     const initialTexture =
       sampleTextures.find((texture) =>
@@ -154,6 +156,7 @@ export const closeWorkspace = (): void => {
   const assetId = state.loadedModel?.sourceAssetId;
   if (assetId) sourceMeshManager.remove(assetId);
   state.layers.forEach((layer) => maskAssetManager.remove(layer.maskAssetId));
+  localTextureManager.clear();
   maskStrokeHistory.clear();
   useWelcomeStore.getState().returnToWelcome();
 };
