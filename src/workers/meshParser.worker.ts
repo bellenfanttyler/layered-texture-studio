@@ -2,6 +2,7 @@
 
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
 import { MeshBVH } from "three-mesh-bvh";
+import { calculateSmoothNormals } from "../mesh/smoothNormals";
 import type { MeshCenter, MeshDimensions } from "../types/mesh";
 import type {
   ParseMeshRequest,
@@ -83,7 +84,7 @@ worker.onmessage = (event: MessageEvent<ParseMeshRequest>) => {
     const serializedBvh = MeshBVH.serialize(bvh);
 
     const positions = new Float32Array(geometry.getAttribute("position").array);
-    const normals = new Float32Array(geometry.getAttribute("normal").array);
+    const normals = calculateSmoothNormals(positions);
     geometry.dispose();
 
     if (positions.length === 0 || positions.length % 9 !== 0) {

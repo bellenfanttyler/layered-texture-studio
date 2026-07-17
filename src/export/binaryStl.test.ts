@@ -13,7 +13,13 @@ describe("binary STL export", () => {
     const view = new DataView(buffer);
 
     expect(buffer.byteLength).toBe(binaryStlByteLength(1));
-    expect(report).toEqual({ triangleCount: 1, byteLength: 134 });
+    expect(report).toMatchObject({
+      triangleCount: 1,
+      byteLength: 134,
+      boundaryEdgeCount: 3,
+      nonManifoldEdgeCount: 0,
+    });
+    expect(report.warnings).toHaveLength(1);
     expect(view.getUint32(80, true)).toBe(1);
     expect(view.getFloat32(84, true)).toBeCloseTo(0);
     expect(view.getFloat32(88, true)).toBeCloseTo(0);
@@ -28,5 +34,17 @@ describe("binary STL export", () => {
     const invalid = triangle.slice();
     invalid[0] = Number.NaN;
     expect(() => validateExportPositions(invalid)).toThrow(/non-finite/);
+  });
+
+  it("recognizes a closed manifold triangle shell", () => {
+    const tetrahedron = new Float32Array([
+      0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0,
+      0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0,
+    ]);
+    const report = validateExportPositions(tetrahedron);
+
+    expect(report.boundaryEdgeCount).toBe(0);
+    expect(report.nonManifoldEdgeCount).toBe(0);
+    expect(report.warnings).toEqual([]);
   });
 });

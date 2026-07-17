@@ -78,6 +78,8 @@ export interface CompositeSamplingRequest {
 export interface CompositeSamplingResult {
   positions: Float32Array;
   activeHeights: Float32Array;
+  changedVertexCount: number;
+  maximumDisplacement: number;
 }
 
 export const buildCompositePositions = async (
@@ -135,9 +137,14 @@ export const buildCompositePositions = async (
     }
   }
 
+  let changedVertexCount = 0;
+  let maximumDisplacement = 0;
   for (let index = 0; index < displacement.length; index += 1) {
     const offset = index * 3;
     const amount = displacement[index] ?? 0;
+    const absoluteAmount = Math.abs(amount);
+    if (absoluteAmount > 1e-8) changedVertexCount += 1;
+    maximumDisplacement = Math.max(maximumDisplacement, absoluteAmount);
     positions[offset] =
       (positions[offset] ?? 0) + (request.normals[offset] ?? 0) * amount;
     positions[offset + 1] =
@@ -148,5 +155,10 @@ export const buildCompositePositions = async (
       (request.normals[offset + 2] ?? 0) * amount;
   }
 
-  return { positions, activeHeights };
+  return {
+    positions,
+    activeHeights,
+    changedVertexCount,
+    maximumDisplacement,
+  };
 };

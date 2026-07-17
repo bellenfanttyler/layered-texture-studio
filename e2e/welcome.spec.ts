@@ -131,6 +131,16 @@ test("a visitor can paint a textured surface selection", async ({ page }) => {
   await expect(viewport).toHaveAttribute("data-preview-ready", "true", {
     timeout: 15_000,
   });
+  await page.getByRole("button", { name: "Prepare STL export" }).click();
+  const preflight = page.getByTestId("export-preflight");
+  await expect(preflight).toBeVisible({ timeout: 15_000 });
+  await expect(preflight.getByText("Finite coordinates")).toBeVisible();
+  await expect(preflight.getByText("Passed")).toBeVisible();
+  await expect(preflight.getByText("Degenerate triangles")).toBeVisible();
+  await expect(page.getByTestId("boundary-edge-count")).toHaveText("0");
+  await expect(page.getByTestId("non-manifold-edge-count")).toHaveText("0");
+  await expect(page.getByTestId("displaced-vertex-count")).not.toHaveText("0");
+  await expect(page.getByText("No geometry warnings detected.")).toBeVisible();
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Export binary STL" }).click();
   const download = await downloadPromise;

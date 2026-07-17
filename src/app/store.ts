@@ -138,6 +138,7 @@ export const useWelcomeStore = create<WelcomeState>((set) => ({
       layers: state.layers.map((layer) =>
         layer.id === state.activeLayer?.id ? { ...layer, ...changes } : layer,
       ),
+      maskRevision: state.maskRevision + 1,
     })),
   setLayers: (layers, activeLayerId) =>
     set((state) => ({

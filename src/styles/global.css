@@ -1591,6 +1591,56 @@ main {
   color: var(--brand-danger);
 }
 
+.export-report {
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+}
+
+.export-report__heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  color: var(--brand-primary);
+  font-size: 0.68rem;
+}
+
+.export-report dl {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.export-report dl > div {
+  padding: var(--space-1) 0;
+  background: transparent;
+}
+
+.export-report__passed,
+.export-report__warnings {
+  margin-top: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border);
+  font-size: 0.6rem;
+  line-height: 1.45;
+}
+
+.export-report__passed {
+  color: var(--brand-success);
+}
+
+.export-report__warnings {
+  color: var(--brand-warning);
+}
+
+.export-report__warnings ul {
+  display: grid;
+  gap: var(--space-1);
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-4);
+}
+
 .export-panel__actions {
   display: flex;
   gap: var(--space-2);

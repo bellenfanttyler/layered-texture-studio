@@ -1,11 +1,12 @@
-import { Download, X } from "lucide-react";
+import { Download, ShieldCheck, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { copy } from "../config/copy";
+import { binaryStlByteLength } from "../export/binaryStl";
+import type { ExportValidationReport } from "../export/binaryStl";
 import {
   downloadMeshExport,
   exportVisibleLayerMesh,
 } from "../export/workspaceExport";
-import { binaryStlByteLength } from "../export/binaryStl";
 import { formatBytes } from "../utils/fileSelection";
 
 interface ExportPanelProps {
@@ -14,12 +15,19 @@ interface ExportPanelProps {
   units: string;
 }
 
+interface PreparedDownload {
+  buffer: ArrayBuffer;
+  filename: string;
+}
+
 export function ExportPanel({
   triangleCount,
   visibleLayerCount,
   units,
 }: ExportPanelProps) {
   const controllerRef = useRef<AbortController | null>(null);
+  const preparedRef = useRef<PreparedDownload | null>(null);
+  const [report, setReport] = useState<ExportValidationReport | null>(null);
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState<string>(copy.workspace.exportReady);
   const [error, setError] = useState<string | null>(null);
@@ -28,13 +36,16 @@ export function ExportPanel({
   useEffect(
     () => () => {
       controllerRef.current?.abort();
+      preparedRef.current = null;
     },
     [],
   );
 
-  const startExport = (): void => {
+  const prepareExport = (): void => {
     const controller = new AbortController();
     controllerRef.current = controller;
+    preparedRef.current = null;
+    setReport(null);
     setError(null);
     setProgress(5);
     setMessage(copy.workspace.exportPreparing);
@@ -47,11 +58,21 @@ export function ExportPanel({
       },
     })
       .then((result) => {
-        downloadMeshExport(result.buffer, result.filename);
+        preparedRef.current = {
+          buffer: result.buffer,
+          filename: result.filename,
+        };
+        setReport({
+          triangleCount: result.triangleCount,
+          byteLength: result.byteLength,
+          boundaryEdgeCount: result.boundaryEdgeCount,
+          nonManifoldEdgeCount: result.nonManifoldEdgeCount,
+          changedVertexCount: result.changedVertexCount,
+          maximumDisplacement: result.maximumDisplacement,
+          warnings: result.warnings,
+        });
         setProgress(100);
-        setMessage(
-          `${copy.workspace.exportComplete} · ${formatBytes(result.byteLength)}`,
-        );
+        setMessage(copy.workspace.preflightComplete);
       })
       .catch((reason: unknown) => {
         if (reason instanceof DOMException && reason.name === "AbortError") {
@@ -71,6 +92,15 @@ export function ExportPanel({
         controllerRef.current = null;
         setIsExporting(false);
       });
+  };
+
+  const downloadPrepared = (): void => {
+    const prepared = preparedRef.current;
+    if (!prepared) return;
+    downloadMeshExport(prepared.buffer, prepared.filename);
+    setMessage(
+      `${copy.workspace.exportComplete} · ${formatBytes(prepared.buffer.byteLength)}`,
+    );
   };
 
   return (
@@ -114,21 +144,89 @@ export function ExportPanel({
           <small>{message}</small>
         </div>
       )}
+      {report && (
+        <div className="export-report" data-testid="export-preflight">
+          <div className="export-report__heading">
+            <ShieldCheck size={16} aria-hidden="true" />
+            <strong>{copy.workspace.preflightHeading}</strong>
+          </div>
+          <dl>
+            <div>
+              <dt>{copy.workspace.preflightCoordinates}</dt>
+              <dd>{copy.workspace.preflightPassed}</dd>
+            </div>
+            <div>
+              <dt>{copy.workspace.preflightDegenerate}</dt>
+              <dd>0</dd>
+            </div>
+            <div>
+              <dt>{copy.workspace.preflightBoundary}</dt>
+              <dd data-testid="boundary-edge-count">
+                {report.boundaryEdgeCount.toLocaleString()}
+              </dd>
+            </div>
+            <div>
+              <dt>{copy.workspace.preflightNonManifold}</dt>
+              <dd data-testid="non-manifold-edge-count">
+                {report.nonManifoldEdgeCount.toLocaleString()}
+              </dd>
+            </div>
+            <div>
+              <dt>{copy.workspace.preflightChanged}</dt>
+              <dd data-testid="displaced-vertex-count">
+                {report.changedVertexCount.toLocaleString()}
+              </dd>
+            </div>
+            <div>
+              <dt>{copy.workspace.preflightMaximum}</dt>
+              <dd>
+                {report.maximumDisplacement.toFixed(4)} {units}
+              </dd>
+            </div>
+          </dl>
+          {report.warnings.length === 0 ? (
+            <p className="export-report__passed">
+              {copy.workspace.preflightNoWarnings}
+            </p>
+          ) : (
+            <div className="export-report__warnings">
+              <strong>{copy.workspace.preflightWarnings}</strong>
+              <ul>
+                {report.warnings.map((warning) => (
+                  <li key={warning}>{warning}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
       {error && (
         <p className="export-panel__error" role="alert">
           {error}
         </p>
       )}
       <div className="export-panel__actions">
-        <button
-          className="button button--primary"
-          type="button"
-          disabled={isExporting}
-          onClick={startExport}
-        >
-          <Download size={15} aria-hidden="true" />
-          {copy.workspace.exportButton}
-        </button>
+        {!report && (
+          <button
+            className="button button--primary"
+            type="button"
+            disabled={isExporting}
+            onClick={prepareExport}
+          >
+            <ShieldCheck size={15} aria-hidden="true" />
+            {copy.workspace.prepareExport}
+          </button>
+        )}
+        {report && (
+          <button
+            className="button button--primary"
+            type="button"
+            onClick={downloadPrepared}
+          >
+            <Download size={15} aria-hidden="true" />
+            {copy.workspace.exportButton}
+          </button>
+        )}
         {isExporting && (
           <button
             className="button button--quiet"

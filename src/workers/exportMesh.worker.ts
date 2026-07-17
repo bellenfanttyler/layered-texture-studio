@@ -33,14 +33,18 @@ worker.onmessage = (event: MessageEvent<ExportMeshRequest>) => {
       progress: 15 + Math.round((completed / Math.max(total, 1)) * 55),
     }),
   )
-    .then(({ positions }) => {
+    .then(({ positions, changedVertexCount, maximumDisplacement }) => {
       post({
         type: "progress",
         requestId: request.requestId,
         message: "Validating displaced geometry",
         progress: 78,
       });
-      const result = serializeBinaryStl(positions, request.header);
+      const result = serializeBinaryStl(positions, request.header, {
+        changedVertexCount,
+        maximumDisplacement,
+        sourceMaximumDimension: request.sourceMaximumDimension,
+      });
       post({
         type: "success",
         requestId: request.requestId,

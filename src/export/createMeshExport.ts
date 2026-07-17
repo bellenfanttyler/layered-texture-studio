@@ -2,16 +2,15 @@ import type {
   ExportMeshRequest,
   ExportMeshWorkerResponse,
 } from "./exportMesh.types";
+import type { ExportValidationReport } from "./binaryStl";
 
 export interface MeshExportOptions {
   signal?: AbortSignal;
   onProgress?: (message: string, progress: number) => void;
 }
 
-export interface MeshExportResult {
+export interface MeshExportResult extends ExportValidationReport {
   buffer: ArrayBuffer;
-  triangleCount: number;
-  byteLength: number;
 }
 
 export const createMeshExport = (

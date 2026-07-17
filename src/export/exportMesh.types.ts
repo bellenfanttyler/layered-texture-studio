@@ -8,6 +8,7 @@ export interface ExportMeshRequest {
   normals: Float32Array;
   layers: TexturePreviewLayerRequest[];
   header: string;
+  sourceMaximumDimension: number;
 }
 
 export type ExportMeshWorkerResponse =

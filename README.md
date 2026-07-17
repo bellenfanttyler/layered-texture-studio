@@ -25,13 +25,15 @@ Implemented so far:
 - Worker-generated triplanar height preview with per-layer texture, scale, midpoint, amplitude, influence, inversion, and visibility controls
 - Cancellable worker-based binary STL export of the visible-layer composite
 - Export validation for finite coordinates and degenerate triangles, with recalculated face normals and branded filenames
+- Preflight reporting for boundary/non-manifold edges, displaced vertices, maximum displacement, warnings, and estimated size
+- Angle-weighted shared source normals that keep coincident STL facets aligned during displacement
 - Central brand, copy, feature, theme-token, and sample-asset configuration
 - Local-only file registry that keeps `File` objects outside component state
 - WebGL 2 compatibility notice
 - Vitest and Playwright test foundations
 - GitHub Pages build and deployment workflow
 
-Not yet implemented: OBJ/GLB import, export subdivision or adaptive remeshing, comprehensive mesh diagnostics/repair, or OBJ export. Project persistence is intentionally out of scope, so reloading or closing the page discards the workspace. Layer-structure and parameter changes are not yet included in undo history, and selecting another layer starts a fresh stroke-history scope. Binary STL export uses the immutable source topology, so texture detail is limited by the imported mesh's vertex density.
+Not yet implemented: OBJ/GLB import, export subdivision or adaptive remeshing, self-intersection/thickness analysis, geometry repair, or OBJ export. Project persistence is intentionally out of scope, so reloading or closing the page discards the workspace. Layer-structure and parameter changes are not yet included in undo history, and selecting another layer starts a fresh stroke-history scope. Binary STL export uses the immutable source topology, so texture detail is limited by the imported mesh's vertex density. Preflight warnings are advisory; this release does not silently repair geometry.
 
 ## Requirements
 

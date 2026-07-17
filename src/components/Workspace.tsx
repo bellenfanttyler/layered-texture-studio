@@ -63,6 +63,7 @@ export function Workspace() {
   const setBrushStrength = useWelcomeStore((state) => state.setBrushStrength);
   const canUndo = useWelcomeStore((state) => state.canUndo);
   const canRedo = useWelcomeStore((state) => state.canRedo);
+  const maskRevision = useWelcomeStore((state) => state.maskRevision);
   const updateActiveLayer = useWelcomeStore((state) => state.updateActiveLayer);
   const setLayers = useWelcomeStore((state) => state.setLayers);
 
@@ -569,6 +570,7 @@ export function Workspace() {
           )}
 
           <ExportPanel
+            key={maskRevision}
             triangleCount={model.triangleCount}
             visibleLayerCount={layers.filter((item) => item.visible).length}
             units={model.units}

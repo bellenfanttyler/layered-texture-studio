@@ -54,6 +54,7 @@ export const exportVisibleLayerMesh = async (
       normals: source.normals.slice(),
       layers,
       header: `${brand.productName} visible-layer export`,
+      sourceMaximumDimension: maximumDimension,
     },
     options,
   );
