@@ -21,6 +21,7 @@ import {
 import { useWelcomeStore } from "../app/store";
 import { copy } from "../config/copy";
 import { sampleTextures } from "../config/sampleAssets";
+import { ExportPanel } from "./ExportPanel";
 import {
   addLayer,
   deleteActiveLayer,
@@ -566,6 +567,12 @@ export function Workspace() {
               </div>
             </section>
           )}
+
+          <ExportPanel
+            triangleCount={model.triangleCount}
+            visibleLayerCount={layers.filter((item) => item.visible).length}
+            units={model.units}
+          />
 
           <dl className="mesh-metrics">
             <div>

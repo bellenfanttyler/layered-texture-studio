@@ -24,7 +24,7 @@ export const copy = {
     privacy:
       "Your files stay on this device. Nothing is uploaded, and the workspace is discarded when this page closes or reloads.",
     initializationNote:
-      "STL viewing, surface painting, and texture preview are available. Printable geometry export remains hidden until that workflow is complete.",
+      "STL viewing, surface painting, texture preview, and source-resolution binary STL export are available.",
     compatibilityTitle: "WebGL 2 is unavailable.",
     compatibilityDetail:
       "Model preview requires a recent browser with hardware acceleration enabled.",
@@ -96,6 +96,22 @@ export const copy = {
     selectedTexture: "Active texture",
     previewBuilding: "Updating texture preview...",
     previewError: "Texture preview unavailable",
+    exportKicker: "Printable geometry",
+    exportHeading: "Export visible layers",
+    exportLayers: "Visible layers",
+    exportTriangles: "Source triangles",
+    exportEstimate: "Estimated size",
+    exportDetail:
+      "Exports the current composite at source-mesh resolution. Subdivision is not applied in this release.",
+    exportUnits:
+      "Binary STL is unitless; coordinate values retain the assumed {units} scale.",
+    exportButton: "Export binary STL",
+    cancelExport: "Cancel export",
+    exportReady: "Ready to export",
+    exportPreparing: "Preparing immutable source geometry",
+    exportComplete: "STL exported",
+    exportCancelled: "Export cancelled",
+    exportFailed: "Export could not be completed",
   },
   steps: [
     {

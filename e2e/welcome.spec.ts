@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { readFile } from "node:fs/promises";
 import { isActionableBrowserIssue } from "../src/test/browserConsole";
 
 test("a visitor can paint a textured surface selection", async ({ page }) => {
@@ -130,6 +131,16 @@ test("a visitor can paint a textured surface selection", async ({ page }) => {
   await expect(viewport).toHaveAttribute("data-preview-ready", "true", {
     timeout: 15_000,
   });
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export binary STL" }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toBe("layered-texture-sphere.stl");
+  const downloadPath = await download.path();
+  expect(downloadPath).not.toBeNull();
+  const exportedStl = await readFile(downloadPath!);
+  expect(exportedStl.readUInt32LE(80)).toBe(65_024);
+  expect((exportedStl.byteLength - 84) % 50).toBe(0);
+  await expect(page.getByText(/STL exported/)).toBeVisible();
   await page.waitForTimeout(10_000);
   await expect(canvas).not.toHaveAttribute("data-context-lost", "true");
   expect(browserIssues).toEqual([]);

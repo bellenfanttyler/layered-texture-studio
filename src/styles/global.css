@@ -1500,6 +1500,109 @@ main {
   accent-color: var(--brand-primary);
 }
 
+.export-panel {
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--brand-accent) 30%, var(--border));
+  border-radius: var(--radius-sm);
+  background: color-mix(
+    in srgb,
+    var(--brand-accent) 4%,
+    var(--workspace-raised)
+  );
+}
+
+.export-panel__heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.export-panel__heading small {
+  color: var(--text-muted);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+}
+
+.export-panel__heading h3 {
+  margin-top: 2px;
+}
+
+.export-panel__heading > strong {
+  color: var(--brand-accent);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+}
+
+.export-panel dl {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+
+.export-panel dl > div {
+  min-width: 0;
+  padding: var(--space-2);
+  border-radius: 4px;
+  background: var(--panel);
+}
+
+.export-panel dt {
+  color: var(--text-muted);
+  font-size: 0.55rem;
+}
+
+.export-panel dd {
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  text-overflow: ellipsis;
+}
+
+.export-panel > p {
+  margin-top: var(--space-3);
+  color: var(--text-muted);
+  font-size: 0.62rem;
+  line-height: 1.45;
+}
+
+.export-panel > .export-panel__units {
+  margin-top: var(--space-2);
+  color: var(--brand-warning);
+}
+
+.export-progress {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.export-progress small {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+}
+
+.export-panel > .export-panel__error {
+  color: var(--brand-danger);
+}
+
+.export-panel__actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.export-panel__actions .button {
+  min-height: 34px;
+  padding: 0 var(--space-3);
+  font-size: 0.62rem;
+}
+
 .mesh-metrics > div {
   display: flex;
   align-items: baseline;
