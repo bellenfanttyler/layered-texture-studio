@@ -16,6 +16,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  overflow: hidden;
   font-family: var(--font-interface);
   -webkit-font-smoothing: antialiased;
 }
@@ -903,16 +904,19 @@ main {
 }
 
 .workspace-main {
-  width: min(1500px, calc(100% - clamp(2rem, 5vw, 4rem)));
-  padding: var(--space-5) 0 var(--space-8);
+  display: grid;
+  width: 100%;
+  height: calc(100dvh - 68px);
+  grid-template-rows: auto minmax(0, 1fr);
+  padding: var(--space-3);
 }
 
 .workspace-heading {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 1fr auto;
   align-items: center;
   gap: var(--space-5);
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-3);
 }
 
 .workspace-heading > div {
@@ -945,10 +949,9 @@ main {
 
 .workspace-grid {
   display: grid;
-  min-height: calc(100vh - 165px);
-  align-items: start;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  gap: var(--space-4);
+  min-height: 0;
+  grid-template-columns: 260px minmax(320px, 1fr) 340px;
+  gap: var(--space-3);
 }
 
 .viewport-panel,
@@ -961,9 +964,213 @@ main {
 
 .viewport-panel {
   position: relative;
-  height: calc(100vh - 165px);
-  min-height: 580px;
-  max-height: 760px;
+  height: 100%;
+  min-height: 0;
+}
+
+.control-rail {
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--panel);
+  scrollbar-color: var(--border-strong) transparent;
+  scrollbar-width: thin;
+}
+
+.control-rail--left {
+  padding: var(--space-4);
+}
+
+.control-rail--right {
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+.control-rail h2,
+.control-rail h3,
+.control-rail p {
+  margin: 0;
+}
+
+.model-card-compact .mesh-panel__heading {
+  padding-bottom: var(--space-4);
+}
+
+.model-card-compact small,
+.tool-panel > small {
+  color: var(--text-muted);
+  font-size: 0.58rem;
+  text-transform: uppercase;
+}
+
+.model-card-compact h2 {
+  max-width: 150px;
+  margin-top: 2px;
+  overflow: hidden;
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.model-card-compact p {
+  margin-top: 3px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+}
+
+.replace-model-button {
+  width: 100%;
+  justify-content: flex-start;
+  margin-top: var(--space-4);
+  text-align: left;
+}
+
+.replace-model-button > span {
+  display: grid;
+  gap: 2px;
+}
+
+.replace-model-button small {
+  color: currentColor;
+  font-size: 0.55rem;
+  opacity: 0.7;
+  text-transform: none;
+}
+
+.rail-error {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid color-mix(in srgb, var(--brand-danger) 40%, var(--border));
+  border-radius: var(--radius-sm);
+  color: var(--brand-danger);
+  font-size: 0.62rem;
+}
+
+.rail-error span {
+  display: grid;
+  gap: 3px;
+}
+
+.rail-error button {
+  align-self: start;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.tool-panel {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.tool-panel h3 {
+  margin-top: 2px;
+  font-size: 0.8rem;
+}
+
+.rail-tools {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.rail-tools .viewport-tool {
+  min-width: 0;
+  justify-content: center;
+  padding: 0 var(--space-2);
+  background: var(--workspace-raised);
+}
+
+.rail-tools .viewport-tool kbd {
+  margin-left: auto;
+}
+
+.control-rail--left .brush-panel {
+  margin-top: var(--space-5);
+}
+
+.brush-panel--legacy,
+.control-rail--right > .mesh-metrics,
+.control-rail--right > .selected-maps {
+  display: none;
+}
+
+.mesh-details {
+  margin-top: var(--space-4);
+  border-top: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.mesh-details summary {
+  padding: var(--space-4) 0 0;
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.mesh-details .mesh-metrics {
+  margin: var(--space-2) 0 0;
+}
+
+.dialog-backdrop {
+  position: fixed;
+  z-index: 30;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-5);
+  background: rgb(3 7 5 / 72%);
+  backdrop-filter: blur(8px);
+}
+
+.confirmation-dialog {
+  width: min(100%, 480px);
+  padding: var(--space-6);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--panel);
+  box-shadow: var(--shadow-panel);
+}
+
+.confirmation-dialog h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.confirmation-dialog p {
+  margin: var(--space-3) 0 0;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+
+.confirmation-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+
+.startup-error {
+  display: grid;
+  max-width: 520px;
+  justify-items: center;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  text-align: center;
+}
+
+.startup-error svg {
+  color: var(--brand-danger);
 }
 
 .model-viewport {
@@ -1784,17 +1991,30 @@ main {
   }
 
   .workspace-grid {
+    grid-template-columns: 230px minmax(280px, 1fr) 300px;
+  }
+}
+
+@media (max-width: 860px) {
+  body {
+    overflow: auto;
+  }
+
+  .workspace-main {
+    height: auto;
+  }
+
+  .workspace-grid {
     grid-template-columns: 1fr;
   }
 
-  .mesh-panel {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-5);
+  .viewport-panel {
+    min-height: 62vh;
+    grid-row: 1;
   }
 
-  .mesh-panel__heading {
-    grid-column: 1 / -1;
+  .control-rail {
+    overflow: visible;
   }
 }
 

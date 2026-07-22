@@ -37,6 +37,9 @@ interface WelcomeState {
   updateImportProgress: (message: string, progress: number) => void;
   finishImport: (model: LoadedModelSummary, layer: MaskLayerSummary) => void;
   failImport: (message: string) => void;
+  failReplacement: (message: string) => void;
+  cancelImport: () => void;
+  clearImportError: () => void;
   returnToWelcome: () => void;
   setActiveTool: (tool: "orbit" | "paint") => void;
   setBrushRadius: (radius: number) => void;
@@ -114,6 +117,20 @@ export const useWelcomeStore = create<WelcomeState>((set) => ({
       importMessage: "Import failed",
       importProgress: 0,
     }),
+  failReplacement: (message) =>
+    set({
+      screen: "workspace",
+      importError: message,
+      importMessage: "Import failed",
+      importProgress: 0,
+    }),
+  cancelImport: () =>
+    set((state) => ({
+      screen: state.loadedModel ? "workspace" : "welcome",
+      importError: null,
+      importProgress: 0,
+    })),
+  clearImportError: () => set({ importError: null }),
   returnToWelcome: () =>
     set({
       screen: "welcome",

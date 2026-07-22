@@ -1,34 +1,33 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it } from "vitest";
+import { render, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
 import { useWelcomeStore } from "./store";
 
-describe("welcome sample selection", () => {
+const importSampleModel = vi.hoisted(() => vi.fn(() => Promise.resolve()));
+
+vi.mock("../mesh/modelImportController", () => ({ importSampleModel }));
+
+describe("workspace startup", () => {
   beforeEach(() => {
+    importSampleModel.mockClear();
     useWelcomeStore.setState({
       theme: "dark",
-      selectedModelId: null,
-      selectedTextureIds: [],
-      localModel: null,
+      screen: "welcome",
+      importError: null,
+      loadedModel: null,
+      layers: [],
+      activeLayer: null,
     });
   });
 
-  it("selects a sample model and independent texture choices", async () => {
-    const user = userEvent.setup();
+  it("loads the configured cube directly with no selected textures", async () => {
     render(<App />);
 
-    await user.click(screen.getByRole("button", { name: /Sphere/i }));
-    await user.click(screen.getByRole("button", { name: /Fabric 025/i }));
-
-    expect(screen.getByRole("button", { name: /Sphere/i })).toHaveAttribute(
-      "aria-pressed",
-      "true",
+    await waitFor(() =>
+      expect(importSampleModel).toHaveBeenCalledWith(
+        expect.objectContaining({ id: "cube" }),
+        [],
+      ),
     );
-    expect(screen.getByRole("button", { name: /Fabric 025/i })).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
-    expect(screen.getByText("Sphere · 1 texture selected")).toBeInTheDocument();
   });
 });

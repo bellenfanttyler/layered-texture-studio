@@ -26,6 +26,7 @@ const runImport = async (
   activeImport = new AbortController();
   const { signal } = activeImport;
   const state = useWelcomeStore.getState();
+  const isReplacement = state.loadedModel !== null;
   state.startImport();
 
   try {
@@ -99,13 +100,13 @@ const runImport = async (
     );
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") return;
-    useWelcomeStore
-      .getState()
-      .failImport(
-        error instanceof Error
-          ? error.message
-          : "The model could not be imported.",
-      );
+    const message =
+      error instanceof Error
+        ? error.message
+        : "The model could not be imported.";
+    const currentState = useWelcomeStore.getState();
+    if (isReplacement) currentState.failReplacement(message);
+    else currentState.failImport(message);
   } finally {
     if (activeImport?.signal === signal) activeImport = null;
   }
@@ -148,7 +149,9 @@ export const importLocalModel = (
 export const cancelModelImport = (): void => {
   activeImport?.abort();
   activeImport = null;
-  useWelcomeStore.getState().returnToWelcome();
+  const state = useWelcomeStore.getState();
+  if (state.loadedModel) state.cancelImport();
+  else state.failImport("The starter model import was cancelled.");
 };
 
 export const closeWorkspace = (): void => {

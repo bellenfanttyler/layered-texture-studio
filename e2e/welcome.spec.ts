@@ -13,17 +13,8 @@ test("a visitor can paint a textured surface selection", async ({ page }) => {
   );
   await page.goto("/");
 
-  await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "Build texture stories",
-  );
-  await page.getByRole("button", { name: /Sphere/i }).click();
-  await page.getByRole("button", { name: /Tile 014/i }).click();
-
-  await expect(page.getByText("Sphere · 1 texture selected")).toBeVisible();
-  await page.getByRole("button", { name: "Open sample model" }).click();
-
   await expect(
-    page.getByRole("heading", { name: "Sphere", level: 1 }),
+    page.getByRole("heading", { name: "Cube", level: 1 }),
   ).toBeVisible({
     timeout: 15_000,
   });
@@ -33,21 +24,49 @@ test("a visitor can paint a textured surface selection", async ({ page }) => {
     timeout: 15_000,
   });
   await expect(page.getByText("Immutable source")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Brick 006" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  const coverage = page.getByTestId("mask-coverage");
+  await expect(coverage).toHaveText("0.0%");
+
+  await page.getByRole("button", { name: "Replace model" }).click();
+  const replacementDialog = page.getByRole("dialog", {
+    name: "Replace the current model?",
+  });
+  await expect(replacementDialog).toContainText(
+    "Masks and texture layers are tied to this mesh and cannot transfer",
+  );
+  await replacementDialog
+    .getByRole("button", { name: "Keep current model" })
+    .click();
+  await expect(coverage).toHaveText("0.0%");
+
+  await page.getByRole("button", { name: "Replace model" }).click();
+  const fileChooserPromise = page.waitForEvent("filechooser");
+  await replacementDialog
+    .getByRole("button", { name: "Choose replacement" })
+    .click();
+  const fileChooser = await fileChooserPromise;
+  await fileChooser.setFiles("public/samples/models/sphere.stl");
+  await expect(
+    page.getByRole("heading", { name: "sphere.stl", level: 1 }),
+  ).toBeVisible({ timeout: 15_000 });
+  await expect(coverage).toHaveText("0.0%");
+  await expect(viewport).toHaveAttribute("data-preview-ready", "true", {
+    timeout: 15_000,
+  });
   const canvas = viewport.locator("canvas");
   await canvas.evaluate((element) => {
     element.addEventListener("webglcontextlost", () => {
       element.dataset.contextLost = "true";
     });
   });
-  await expect(page.getByRole("button", { name: "Tile 014" })).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
 
   await page.getByRole("button", { name: /Paint selection/i }).click();
   const bounds = await viewport.boundingBox();
   if (!bounds) throw new Error("Viewport bounds are unavailable.");
-  const coverage = page.getByTestId("mask-coverage");
   for (const verticalRatio of [0.5, 0.65, 0.8]) {
     await page.mouse.move(
       bounds.x + bounds.width * 0.5,

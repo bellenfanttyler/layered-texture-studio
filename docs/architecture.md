@@ -12,6 +12,15 @@ Configuration is split by concern:
 - `sampleAssets.ts`: bundled model and texture catalog
 - `tokens.css`: global visual system
 
+The application shell is workspace-first. `App` imports the configured default
+cube on startup, then keeps a three-column editing layout within the viewport:
+model replacement and brush controls on the left, the persistent 3D canvas in
+the center, and an independently scrollable layer/texture/export rail on the
+right. Model replacement enters the existing cancellable import pipeline only
+after an explicit mask-transfer warning. Import failure or cancellation restores
+the prior workspace; successful parsing atomically swaps the immutable source,
+layers, and empty initial mask.
+
 ## Required processing boundaries
 
 Future mesh work must preserve these invariants:

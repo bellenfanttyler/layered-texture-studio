@@ -165,14 +165,16 @@ Example: `LMB paint - Alt erase - [ / ] brush size - Space orbit`
 
 ## 6. First-launch experience
 
-Before a model is loaded, show:
+Open directly into the editing workspace with the bundled cube loaded. The
+starter cube is undisplaced and its initial texture layer has an empty mask.
+Keep the viewport visible while editing: model replacement and brush controls
+live in the left rail, while layers, texture controls, and export live in an
+independently scrollable right rail.
 
-- Large drag-and-drop target
-- Open 3D Model button
-- Supported formats
-- Try Sample Model button
-- Three-step explanation: Import, Paint and Layer, Export
-- Privacy statement: “Your files stay on this device.”
+Allow the user to replace the cube with a local model. Before opening the file
+picker, explain that masks and texture layers are mesh-specific and cannot
+transfer to the replacement. Cancelling leaves the current workspace intact;
+a successful replacement starts with one empty mask.
 
 Bundle at least two permissively licensed sample meshes and several original or permissively licensed displacement maps. Include a rounded enclosure, a cylindrical grip, and textures such as leather, knurl, hexagons, dots, fabric, waves, diamonds, lines, and noise.
 

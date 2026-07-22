@@ -7,7 +7,9 @@ A static, local-first browser application for building nondestructive texture an
 Implemented so far:
 
 - Vite, React, and strict TypeScript application foundation
-- Responsive dark/light welcome shell with accessible focus and reduced-motion behavior
+- Workspace-first single-page shell with a preloaded, undisplaced cube and empty mask
+- Fixed center viewport with model/brush controls on the left and an independently scrollable layer/texture/export rail on the right
+- Confirmed local model replacement that clearly resets mesh-specific masks and layers
 - Local model file selection for binary and ASCII STL files
 - Selectable bundled sample models and texture maps
 - Binary and ASCII STL parsing in a cancellable Web Worker

@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import {
-  ArrowLeft,
   ArrowDown,
   ArrowUp,
   Box,
@@ -17,7 +16,10 @@ import {
   Redo2,
   Undo2,
   Trash2,
+  Upload,
+  X,
 } from "lucide-react";
+import { registerLocalModel } from "../assets/localFileRegistry";
 import { useWelcomeStore } from "../app/store";
 import { copy } from "../config/copy";
 import { sampleTextures } from "../config/sampleAssets";
@@ -29,14 +31,14 @@ import {
   moveActiveLayer,
   selectLayer,
 } from "../layers/layerController";
-import { closeWorkspace } from "../mesh/modelImportController";
+import { importLocalModel } from "../mesh/modelImportController";
 import { redoMaskStroke, undoMaskStroke } from "../selection/maskCommands";
 import { getTextureSource } from "../textures/textureCatalog";
 import {
   assignTextureToActiveLayer,
   importTextureForActiveLayer,
 } from "../textures/textureController";
-import { formatBytes } from "../utils/fileSelection";
+import { formatBytes, validateModelFile } from "../utils/fileSelection";
 import { ModelViewport } from "../viewport/ModelViewport";
 
 const formatMeasurement = (value: number): string =>
@@ -46,6 +48,12 @@ const formatCount = (value: number): string =>
   new Intl.NumberFormat().format(value);
 
 export function Workspace() {
+  const modelInputRef = useRef<HTMLInputElement>(null);
+  const replaceActionRef = useRef<HTMLButtonElement>(null);
+  const [replaceDialogOpen, setReplaceDialogOpen] = useState(false);
+  const [modelSelectionError, setModelSelectionError] = useState<string | null>(
+    null,
+  );
   const [textureImportError, setTextureImportError] = useState<string | null>(
     null,
   );
@@ -64,6 +72,8 @@ export function Workspace() {
   const canUndo = useWelcomeStore((state) => state.canUndo);
   const canRedo = useWelcomeStore((state) => state.canRedo);
   const maskRevision = useWelcomeStore((state) => state.maskRevision);
+  const importError = useWelcomeStore((state) => state.importError);
+  const clearImportError = useWelcomeStore((state) => state.clearImportError);
   const updateActiveLayer = useWelcomeStore((state) => state.updateActiveLayer);
   const setLayers = useWelcomeStore((state) => state.setLayers);
 
@@ -87,6 +97,39 @@ export function Workspace() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [setActiveTool]);
 
+  useEffect(() => {
+    if (!replaceDialogOpen) return;
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setReplaceDialogOpen(false);
+        replaceActionRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [replaceDialogOpen]);
+
+  const handleReplacement = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.currentTarget.files?.[0];
+    event.currentTarget.value = "";
+    if (!file) return;
+    const validation = validateModelFile(file);
+    if (!validation.valid) {
+      setModelSelectionError(
+        validation.message ?? "That file cannot be selected.",
+      );
+      return;
+    }
+    setModelSelectionError(null);
+    clearImportError();
+    void importLocalModel({
+      assetId: registerLocalModel(file),
+      name: file.name,
+      size: file.size,
+      extension: validation.extension,
+    });
+  };
+
   if (!model) return null;
 
   const maximumDimension = Math.max(
@@ -102,14 +145,6 @@ export function Workspace() {
   return (
     <main className="workspace-main">
       <section className="workspace-heading">
-        <button
-          className="button button--quiet"
-          type="button"
-          onClick={closeWorkspace}
-        >
-          <ArrowLeft size={16} aria-hidden="true" />
-          {copy.workspace.back}
-        </button>
         <div>
           <span className="section-kicker">
             {model.format.toUpperCase()} · {model.units}
@@ -123,37 +158,220 @@ export function Workspace() {
       </section>
 
       <section className="workspace-grid">
+        <aside className="control-rail control-rail--left">
+          <section
+            className="model-card-compact"
+            aria-labelledby="current-model-heading"
+          >
+            <div className="mesh-panel__heading">
+              <span className="mesh-panel__icon" aria-hidden="true">
+                <Box size={20} />
+              </span>
+              <div>
+                <small>{copy.workspace.modelHeading}</small>
+                <h2 id="current-model-heading">{model.name}</h2>
+                <p>
+                  {model.format.toUpperCase()} · {model.units}
+                </p>
+              </div>
+            </div>
+            <button
+              ref={replaceActionRef}
+              className="button button--primary replace-model-button"
+              type="button"
+              onClick={() => setReplaceDialogOpen(true)}
+            >
+              <Upload size={16} aria-hidden="true" />
+              <span>
+                <strong>{copy.workspace.replaceModel}</strong>
+                <small>{copy.workspace.replaceModelHint}</small>
+              </span>
+            </button>
+            <input
+              ref={modelInputRef}
+              className="visually-hidden"
+              type="file"
+              accept=".stl"
+              tabIndex={-1}
+              onChange={handleReplacement}
+            />
+            {(modelSelectionError || importError) && (
+              <div className="rail-error" role="alert">
+                <span>
+                  <strong>{copy.workspace.replacementFailed}</strong>
+                  {modelSelectionError ?? importError}
+                </span>
+                <button
+                  type="button"
+                  aria-label={copy.workspace.dismissError}
+                  onClick={() => {
+                    setModelSelectionError(null);
+                    clearImportError();
+                  }}
+                >
+                  <X size={14} aria-hidden="true" />
+                </button>
+              </div>
+            )}
+          </section>
+
+          <section
+            className="tool-panel"
+            aria-labelledby="viewport-tools-heading"
+          >
+            <small>{copy.workspace.toolsHeading}</small>
+            <h3 id="viewport-tools-heading">{copy.workspace.tools}</h3>
+            <div className="rail-tools">
+              <button
+                className={
+                  activeTool === "orbit"
+                    ? "viewport-tool viewport-tool--active"
+                    : "viewport-tool"
+                }
+                type="button"
+                aria-pressed={activeTool === "orbit"}
+                onClick={() => setActiveTool("orbit")}
+              >
+                <Orbit size={16} aria-hidden="true" />
+                {copy.workspace.orbitTool}
+                <kbd>1</kbd>
+              </button>
+              <button
+                className={
+                  activeTool === "paint"
+                    ? "viewport-tool viewport-tool--active"
+                    : "viewport-tool"
+                }
+                type="button"
+                aria-pressed={activeTool === "paint"}
+                onClick={() => setActiveTool("paint")}
+              >
+                <Brush size={16} aria-hidden="true" />
+                {copy.workspace.paintTool}
+                <kbd>2</kbd>
+              </button>
+            </div>
+          </section>
+
+          {layer && (
+            <section
+              className="brush-panel"
+              aria-labelledby="active-layer-heading"
+            >
+              <div className="brush-panel__title">
+                <span
+                  style={{ backgroundColor: layer.displayColor }}
+                  aria-hidden="true"
+                />
+                <div>
+                  <small>{copy.workspace.activeLayer}</small>
+                  <h3 id="active-layer-heading">{layer.name}</h3>
+                </div>
+                <strong data-testid="mask-coverage">
+                  {(layer.coverage * 100).toFixed(1)}%
+                </strong>
+              </div>
+              <div className="history-actions">
+                <button
+                  type="button"
+                  onClick={undoMaskStroke}
+                  disabled={!canUndo}
+                >
+                  <Undo2 size={15} aria-hidden="true" />
+                  {copy.workspace.undo}
+                </button>
+                <button
+                  type="button"
+                  onClick={redoMaskStroke}
+                  disabled={!canRedo}
+                >
+                  <Redo2 size={15} aria-hidden="true" />
+                  {copy.workspace.redo}
+                </button>
+              </div>
+              <label className="brush-control">
+                <span>
+                  {copy.workspace.radius}
+                  <output>
+                    {formatMeasurement(brushRadius)} {model.units}
+                  </output>
+                </span>
+                <input
+                  type="range"
+                  min={maximumDimension * 0.01}
+                  max={maximumDimension * 0.25}
+                  step={maximumDimension * 0.0025}
+                  value={brushRadius}
+                  onChange={(event) =>
+                    setBrushRadius(Number(event.target.value))
+                  }
+                />
+              </label>
+              <label className="brush-control">
+                <span>
+                  {copy.workspace.hardness}
+                  <output>{Math.round(brushHardness * 100)}%</output>
+                </span>
+                <input
+                  type="range"
+                  min={0.05}
+                  max={0.95}
+                  step={0.05}
+                  value={brushHardness}
+                  onChange={(event) =>
+                    setBrushHardness(Number(event.target.value))
+                  }
+                />
+              </label>
+              <label className="brush-control">
+                <span>
+                  {copy.workspace.strength}
+                  <output>{Math.round(brushStrength * 100)}%</output>
+                </span>
+                <input
+                  type="range"
+                  min={0.05}
+                  max={1}
+                  step={0.05}
+                  value={brushStrength}
+                  onChange={(event) =>
+                    setBrushStrength(Number(event.target.value))
+                  }
+                />
+              </label>
+            </section>
+          )}
+
+          <details className="mesh-details">
+            <summary>{copy.workspace.meshDetails}</summary>
+            <dl className="mesh-metrics">
+              <div>
+                <dt>{copy.workspace.dimensions}</dt>
+                <dd>
+                  {formatMeasurement(model.dimensions.width)} ×{" "}
+                  {formatMeasurement(model.dimensions.height)} ×{" "}
+                  {formatMeasurement(model.dimensions.depth)} {model.units}
+                </dd>
+              </div>
+              <div>
+                <dt>{copy.workspace.triangles}</dt>
+                <dd>{formatCount(model.triangleCount)}</dd>
+              </div>
+              <div>
+                <dt>{copy.workspace.vertices}</dt>
+                <dd>{formatCount(model.vertexCount)}</dd>
+              </div>
+              {model.fileSize > 0 && (
+                <div>
+                  <dt>{copy.workspace.fileSize}</dt>
+                  <dd>{formatBytes(model.fileSize)}</dd>
+                </div>
+              )}
+            </dl>
+          </details>
+        </aside>
+
         <div className="viewport-panel">
-          <div className="viewport-tools" aria-label={copy.workspace.tools}>
-            <button
-              className={
-                activeTool === "orbit"
-                  ? "viewport-tool viewport-tool--active"
-                  : "viewport-tool"
-              }
-              type="button"
-              aria-pressed={activeTool === "orbit"}
-              onClick={() => setActiveTool("orbit")}
-            >
-              <Orbit size={16} aria-hidden="true" />
-              {copy.workspace.orbitTool}
-              <kbd>1</kbd>
-            </button>
-            <button
-              className={
-                activeTool === "paint"
-                  ? "viewport-tool viewport-tool--active"
-                  : "viewport-tool"
-              }
-              type="button"
-              aria-pressed={activeTool === "paint"}
-              onClick={() => setActiveTool("paint")}
-            >
-              <Brush size={16} aria-hidden="true" />
-              {copy.workspace.paintTool}
-              <kbd>2</kbd>
-            </button>
-          </div>
           <ModelViewport model={model} />
           <div className="viewport-hint">
             <MousePointer2 size={15} aria-hidden="true" />
@@ -163,17 +381,10 @@ export function Workspace() {
           </div>
         </div>
 
-        <aside className="mesh-panel" aria-labelledby="mesh-overview-heading">
-          <div className="mesh-panel__heading">
-            <span className="mesh-panel__icon" aria-hidden="true">
-              <Box size={20} />
-            </span>
-            <div>
-              <h2 id="mesh-overview-heading">{copy.workspace.overview}</h2>
-              <p>{copy.workspace.sourceDetail}</p>
-            </div>
-          </div>
-
+        <aside
+          className="control-rail control-rail--right"
+          aria-labelledby="layers-heading"
+        >
           <section className="layer-panel" aria-labelledby="layers-heading">
             <div className="layer-panel__heading">
               <div>
@@ -307,8 +518,8 @@ export function Workspace() {
 
           {layer && (
             <section
-              className="brush-panel"
-              aria-labelledby="active-layer-heading"
+              className="brush-panel brush-panel--legacy"
+              aria-labelledby="legacy-active-layer-heading"
             >
               <div className="brush-panel__title">
                 <span
@@ -317,11 +528,9 @@ export function Workspace() {
                 />
                 <div>
                   <small>{copy.workspace.activeLayer}</small>
-                  <h3 id="active-layer-heading">{layer.name}</h3>
+                  <h3 id="legacy-active-layer-heading">{layer.name}</h3>
                 </div>
-                <strong data-testid="mask-coverage">
-                  {(layer.coverage * 100).toFixed(1)}%
-                </strong>
+                <strong>{(layer.coverage * 100).toFixed(1)}%</strong>
               </div>
               <div className="history-actions">
                 <button
@@ -618,6 +827,56 @@ export function Workspace() {
           </div>
         </aside>
       </section>
+      {replaceDialogOpen && (
+        <div
+          className="dialog-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setReplaceDialogOpen(false);
+              replaceActionRef.current?.focus();
+            }
+          }}
+        >
+          <section
+            className="confirmation-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="replace-dialog-heading"
+            aria-describedby="replace-dialog-detail"
+          >
+            <h2 id="replace-dialog-heading">
+              {copy.workspace.replaceConfirmTitle}
+            </h2>
+            <p id="replace-dialog-detail">
+              {copy.workspace.replaceConfirmDetail}
+            </p>
+            <div className="confirmation-dialog__actions">
+              <button
+                className="button button--quiet"
+                type="button"
+                onClick={() => {
+                  setReplaceDialogOpen(false);
+                  replaceActionRef.current?.focus();
+                }}
+              >
+                {copy.workspace.replaceConfirmCancel}
+              </button>
+              <button
+                className="button button--primary"
+                type="button"
+                autoFocus
+                onClick={() => {
+                  setReplaceDialogOpen(false);
+                  modelInputRef.current?.click();
+                }}
+              >
+                {copy.workspace.replaceConfirmAction}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </main>
   );
 }

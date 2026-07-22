@@ -1,15 +1,12 @@
-import { lazy, Suspense, useState } from "react";
-import { LockKeyhole, TriangleAlert } from "lucide-react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { TriangleAlert } from "lucide-react";
 import { useWelcomeStore } from "./store";
 import { useBrandMetadata } from "./useBrandMetadata";
-import { brand } from "../config/brand";
 import { copy } from "../config/copy";
-import { AppFooter } from "../components/AppFooter";
+import { defaultSampleModelId, sampleModels } from "../config/sampleAssets";
 import { AppHeader } from "../components/AppHeader";
 import { ImportProgress } from "../components/ImportProgress";
-import { ModelDropzone } from "../components/ModelDropzone";
-import { SampleSelector } from "../components/SampleSelector";
-import { WorkflowSteps } from "../components/WorkflowSteps";
+import { importSampleModel } from "../mesh/modelImportController";
 import { supportsWebGL2 } from "../utils/webgl";
 
 const Workspace = lazy(() =>
@@ -23,7 +20,24 @@ export function App() {
   const theme = useWelcomeStore((state) => state.theme);
   const screen = useWelcomeStore((state) => state.screen);
   const importError = useWelcomeStore((state) => state.importError);
+  const loadedModel = useWelcomeStore((state) => state.loadedModel);
   const [webglAvailable] = useState(supportsWebGL2);
+  const starterImportStarted = useRef(false);
+  const starterModel = sampleModels.find(
+    (model) => model.id === defaultSampleModelId,
+  );
+
+  useEffect(() => {
+    if (
+      starterImportStarted.current ||
+      screen !== "welcome" ||
+      loadedModel ||
+      !starterModel
+    )
+      return;
+    starterImportStarted.current = true;
+    void importSampleModel(starterModel, []);
+  }, [loadedModel, screen, starterModel]);
 
   return (
     <div className="app" data-theme={theme}>
@@ -51,38 +65,31 @@ export function App() {
         </Suspense>
       )}
       {screen === "welcome" && (
-        <>
-          <main>
-            {importError && (
-              <div className="import-error" role="alert">
-                <TriangleAlert size={18} aria-hidden="true" />
-                <span>
-                  <strong>{copy.welcome.importErrorTitle}</strong>
-                  {importError}
-                </span>
-              </div>
-            )}
-            <section className="welcome-hero">
-              <div className="welcome-hero__glow" aria-hidden="true" />
-              <div className="welcome-copy">
-                <span className="eyebrow">
-                  <LockKeyhole size={14} aria-hidden="true" />
-                  {copy.welcome.eyebrow}
-                </span>
-                <h1>{copy.welcome.title}</h1>
-                <p>{copy.welcome.introduction}</p>
-                <span className="brand-tagline">{brand.tagline}</span>
-              </div>
-              <ModelDropzone />
-            </section>
-
-            <WorkflowSteps />
-            <SampleSelector />
-
-            <p className="milestone-note">{copy.welcome.initializationNote}</p>
-          </main>
-          <AppFooter />
-        </>
+        <main
+          className="workspace-loading"
+          role={importError ? "alert" : "status"}
+        >
+          {importError ? (
+            <div className="startup-error">
+              <TriangleAlert size={20} aria-hidden="true" />
+              <strong>{copy.welcome.importErrorTitle}</strong>
+              <span>{importError}</span>
+              <button
+                className="button button--primary"
+                type="button"
+                onClick={() => {
+                  if (!starterModel) return;
+                  starterImportStarted.current = true;
+                  void importSampleModel(starterModel, []);
+                }}
+              >
+                {copy.workspace.retryStarter}
+              </button>
+            </div>
+          ) : (
+            copy.workspace.initializing
+          )}
+        </main>
       )}
     </div>
   );
