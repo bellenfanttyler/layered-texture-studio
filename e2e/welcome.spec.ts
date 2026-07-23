@@ -23,7 +23,6 @@ test("a visitor can paint a textured surface selection", async ({ page }) => {
   await expect(viewport).toHaveAttribute("data-preview-ready", "true", {
     timeout: 15_000,
   });
-  await expect(page.getByText("Immutable source")).toBeVisible();
   await expect(page.getByRole("button", { name: "Brick 006" })).toHaveAttribute(
     "aria-pressed",
     "true",

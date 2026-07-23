@@ -77,21 +77,9 @@ button {
   text-decoration: none;
 }
 
-.brand-lockup > span:last-child {
-  display: grid;
-  gap: 2px;
-}
-
 .brand-lockup strong {
   font-size: 0.9rem;
   letter-spacing: -0.01em;
-}
-
-.brand-lockup small {
-  color: var(--text-muted);
-  font-size: 0.67rem;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
 }
 
 .brand-mark {
@@ -907,44 +895,8 @@ main {
   display: grid;
   width: 100%;
   height: calc(100dvh - 68px);
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   padding: var(--space-3);
-}
-
-.workspace-heading {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: var(--space-5);
-  margin-bottom: var(--space-3);
-}
-
-.workspace-heading > div {
-  min-width: 0;
-}
-
-.workspace-heading h1 {
-  margin: var(--space-1) 0 0;
-  overflow: hidden;
-  font-size: clamp(1.3rem, 3vw, 2rem);
-  font-weight: 570;
-  letter-spacing: -0.035em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.source-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: 0.45rem 0.68rem;
-  border: 1px solid color-mix(in srgb, var(--brand-primary) 35%, var(--border));
-  border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--brand-primary) 7%, var(--panel));
-  color: var(--brand-primary);
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  text-transform: uppercase;
 }
 
 .workspace-grid {
@@ -987,6 +939,7 @@ main {
   padding: 0 var(--space-4) var(--space-4);
 }
 
+.control-rail h1,
 .control-rail h2,
 .control-rail h3,
 .control-rail p {
@@ -1004,7 +957,7 @@ main {
   text-transform: uppercase;
 }
 
-.model-card-compact h2 {
+.model-card-compact h1 {
   max-width: 150px;
   margin-top: 2px;
   overflow: hidden;
@@ -1021,7 +974,10 @@ main {
 }
 
 .replace-model-button {
+  display: inline-flex;
+  align-items: center;
   width: 100%;
+  gap: var(--space-2);
   justify-content: flex-start;
   margin-top: var(--space-4);
   text-align: left;
@@ -1105,13 +1061,12 @@ main {
 }
 
 .mesh-details {
-  margin-top: var(--space-4);
-  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
   color: var(--text-secondary);
 }
 
 .mesh-details summary {
-  padding: var(--space-4) 0 0;
+  padding: var(--space-3) 0;
   cursor: pointer;
   font-size: 0.68rem;
   font-weight: 700;
@@ -2023,7 +1978,6 @@ main {
     width: min(100% - 2rem, 1240px);
   }
 
-  .brand-lockup small,
   .privacy-status {
     display: none;
   }
@@ -2083,24 +2037,6 @@ main {
   .selection-summary__action {
     width: 100%;
     margin-left: 0;
-  }
-
-  .workspace-heading {
-    grid-template-columns: 1fr auto;
-  }
-
-  .workspace-heading > .button {
-    grid-column: 1 / -1;
-    justify-self: start;
-  }
-
-  .source-badge {
-    font-size: 0;
-  }
-
-  .source-badge svg {
-    width: 16px;
-    height: 16px;
   }
 
   .viewport-panel {

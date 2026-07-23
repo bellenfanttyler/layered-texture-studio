@@ -17,10 +17,7 @@ export function AppHeader() {
         aria-label={`${brand.productName} home`}
       >
         <BrandMark />
-        <span>
-          <strong>{brand.productName}</strong>
-          <small>{brand.companyName}</small>
-        </span>
+        <strong>{brand.productName}</strong>
       </a>
 
       <div className="header-actions">

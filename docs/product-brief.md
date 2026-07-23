@@ -168,8 +168,8 @@ Example: `LMB paint - Alt erase - [ / ] brush size - Space orbit`
 Open directly into the editing workspace with the bundled cube loaded. The
 starter cube is undisplaced and its initial texture layer has an empty mask.
 Keep the viewport visible while editing: model replacement and brush controls
-live in the left rail, while layers, texture controls, and export live in an
-independently scrollable right rail.
+live in the left rail with mesh details and export, while layers and texture
+controls live in an independently scrollable right rail.
 
 Allow the user to replace the cube with a local model. Before opening the file
 picker, explain that masks and texture layers are mesh-specific and cannot

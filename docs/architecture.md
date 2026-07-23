@@ -14,9 +14,10 @@ Configuration is split by concern:
 
 The application shell is workspace-first. `App` imports the configured default
 cube on startup, then keeps a three-column editing layout within the viewport:
-model replacement and brush controls on the left, the persistent 3D canvas in
-the center, and an independently scrollable layer/texture/export rail on the
-right. Model replacement enters the existing cancellable import pipeline only
+model replacement, mesh details, brush controls, and export on the left, the
+persistent 3D canvas in the center, and an independently scrollable
+layer/texture rail on the right. Model replacement enters the existing
+cancellable import pipeline only
 after an explicit mask-transfer warning. Import failure or cancellation restores
 the prior workspace; successful parsing atomically swaps the immutable source,
 layers, and empty initial mask.

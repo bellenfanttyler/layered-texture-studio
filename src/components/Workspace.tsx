@@ -9,7 +9,6 @@ import {
   EyeOff,
   ImagePlus,
   Layers3,
-  LockKeyhole,
   MousePointer2,
   Orbit,
   Plus,
@@ -144,19 +143,6 @@ export function Workspace() {
 
   return (
     <main className="workspace-main">
-      <section className="workspace-heading">
-        <div>
-          <span className="section-kicker">
-            {model.format.toUpperCase()} · {model.units}
-          </span>
-          <h1>{model.name}</h1>
-        </div>
-        <span className="source-badge">
-          <LockKeyhole size={15} aria-hidden="true" />
-          {copy.workspace.sourceProtected}
-        </span>
-      </section>
-
       <section className="workspace-grid">
         <aside className="control-rail control-rail--left">
           <section
@@ -169,12 +155,39 @@ export function Workspace() {
               </span>
               <div>
                 <small>{copy.workspace.modelHeading}</small>
-                <h2 id="current-model-heading">{model.name}</h2>
+                <h1 id="current-model-heading">{model.name}</h1>
                 <p>
                   {model.format.toUpperCase()} · {model.units}
                 </p>
               </div>
             </div>
+            <details className="mesh-details">
+              <summary>{copy.workspace.meshDetails}</summary>
+              <dl className="mesh-metrics">
+                <div>
+                  <dt>{copy.workspace.dimensions}</dt>
+                  <dd>
+                    {formatMeasurement(model.dimensions.width)} ×{" "}
+                    {formatMeasurement(model.dimensions.height)} ×{" "}
+                    {formatMeasurement(model.dimensions.depth)} {model.units}
+                  </dd>
+                </div>
+                <div>
+                  <dt>{copy.workspace.triangles}</dt>
+                  <dd>{formatCount(model.triangleCount)}</dd>
+                </div>
+                <div>
+                  <dt>{copy.workspace.vertices}</dt>
+                  <dd>{formatCount(model.vertexCount)}</dd>
+                </div>
+                {model.fileSize > 0 && (
+                  <div>
+                    <dt>{copy.workspace.fileSize}</dt>
+                    <dd>{formatBytes(model.fileSize)}</dd>
+                  </div>
+                )}
+              </dl>
+            </details>
             <button
               ref={replaceActionRef}
               className="button button--primary replace-model-button"
@@ -342,33 +355,12 @@ export function Workspace() {
             </section>
           )}
 
-          <details className="mesh-details">
-            <summary>{copy.workspace.meshDetails}</summary>
-            <dl className="mesh-metrics">
-              <div>
-                <dt>{copy.workspace.dimensions}</dt>
-                <dd>
-                  {formatMeasurement(model.dimensions.width)} ×{" "}
-                  {formatMeasurement(model.dimensions.height)} ×{" "}
-                  {formatMeasurement(model.dimensions.depth)} {model.units}
-                </dd>
-              </div>
-              <div>
-                <dt>{copy.workspace.triangles}</dt>
-                <dd>{formatCount(model.triangleCount)}</dd>
-              </div>
-              <div>
-                <dt>{copy.workspace.vertices}</dt>
-                <dd>{formatCount(model.vertexCount)}</dd>
-              </div>
-              {model.fileSize > 0 && (
-                <div>
-                  <dt>{copy.workspace.fileSize}</dt>
-                  <dd>{formatBytes(model.fileSize)}</dd>
-                </div>
-              )}
-            </dl>
-          </details>
+          <ExportPanel
+            key={maskRevision}
+            triangleCount={model.triangleCount}
+            visibleLayerCount={layers.filter((item) => item.visible).length}
+            units={model.units}
+          />
         </aside>
 
         <div className="viewport-panel">
@@ -777,13 +769,6 @@ export function Workspace() {
               </div>
             </section>
           )}
-
-          <ExportPanel
-            key={maskRevision}
-            triangleCount={model.triangleCount}
-            visibleLayerCount={layers.filter((item) => item.visible).length}
-            units={model.units}
-          />
 
           <dl className="mesh-metrics">
             <div>
