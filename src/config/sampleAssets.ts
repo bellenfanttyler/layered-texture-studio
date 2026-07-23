@@ -22,6 +22,13 @@ export interface SampleTexture {
 
 export const defaultSampleModelId = "cube";
 
+export const layerTextureDefaults = {
+  scale: 0.25,
+  amplitude: 0.05,
+  midpoint: 0.5,
+  influence: 1,
+} as const;
+
 const publicAsset = (path: string): string =>
   `${import.meta.env.BASE_URL}${path.replace(/^\//, "")}`;
 
@@ -64,8 +71,8 @@ export const sampleTextures: SampleTexture[] = [
     name: "Brick 006",
     category: "Masonry",
     imageUrl: publicAsset("samples/textures/BRK_006_4K_Height_04.png"),
-    defaultScale: 1,
-    defaultAmplitude: 0.3,
+    defaultScale: layerTextureDefaults.scale,
+    defaultAmplitude: layerTextureDefaults.amplitude,
     license: "CC BY-NC 4.0",
   },
   {
@@ -73,8 +80,8 @@ export const sampleTextures: SampleTexture[] = [
     name: "Fabric 025",
     category: "Fabric",
     imageUrl: publicAsset("samples/textures/FAB_025_4K_Height_04.png"),
-    defaultScale: 1,
-    defaultAmplitude: 0.3,
+    defaultScale: layerTextureDefaults.scale,
+    defaultAmplitude: layerTextureDefaults.amplitude,
     license: "CC BY-NC 4.0",
   },
   {
@@ -82,8 +89,8 @@ export const sampleTextures: SampleTexture[] = [
     name: "Ground 013",
     category: "Ground",
     imageUrl: publicAsset("samples/textures/GRD_013_4K_Height_04.png"),
-    defaultScale: 1,
-    defaultAmplitude: 0.3,
+    defaultScale: layerTextureDefaults.scale,
+    defaultAmplitude: layerTextureDefaults.amplitude,
     license: "CC BY-NC 4.0",
   },
   {
@@ -91,8 +98,8 @@ export const sampleTextures: SampleTexture[] = [
     name: "Mixed 015",
     category: "Mixed",
     imageUrl: publicAsset("samples/textures/MIX_015_4K_Height_04.png"),
-    defaultScale: 1,
-    defaultAmplitude: 0.3,
+    defaultScale: layerTextureDefaults.scale,
+    defaultAmplitude: layerTextureDefaults.amplitude,
     license: "CC BY-NC 4.0",
   },
   {
@@ -100,8 +107,8 @@ export const sampleTextures: SampleTexture[] = [
     name: "Tile 014",
     category: "Tile",
     imageUrl: publicAsset("samples/textures/TIL_014_4K_Height_01.png"),
-    defaultScale: 1,
-    defaultAmplitude: 0.3,
+    defaultScale: layerTextureDefaults.scale,
+    defaultAmplitude: layerTextureDefaults.amplitude,
     license: "CC BY-NC 4.0",
   },
   {
@@ -109,8 +116,8 @@ export const sampleTextures: SampleTexture[] = [
     name: "Wood 008",
     category: "Wood",
     imageUrl: publicAsset("samples/textures/WOD_008_4K_AO.png"),
-    defaultScale: 1,
-    defaultAmplitude: 0.3,
+    defaultScale: layerTextureDefaults.scale,
+    defaultAmplitude: layerTextureDefaults.amplitude,
     license: "CC BY-NC 4.0",
   },
 ];

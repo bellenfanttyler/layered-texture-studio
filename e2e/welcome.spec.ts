@@ -56,6 +56,10 @@ test("a visitor can paint a textured surface selection", async ({ page }) => {
   await expect(viewport).toHaveAttribute("data-preview-ready", "true", {
     timeout: 15_000,
   });
+  await expect(page.getByTestId("texture-scale")).toHaveValue("0.25");
+  await expect(page.getByTestId("texture-amplitude")).toHaveValue("0.05");
+  await expect(page.getByTestId("texture-midpoint")).toHaveValue("0.5");
+  await expect(page.getByTestId("texture-influence")).toHaveValue("1");
   const canvas = viewport.locator("canvas");
   await canvas.evaluate((element) => {
     element.addEventListener("webglcontextlost", () => {
@@ -141,7 +145,6 @@ test("a visitor can paint a textured surface selection", async ({ page }) => {
   await expect(
     page.getByRole("button", { name: "Show Grip details" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Show Grip details" }).click();
   await page.getByRole("button", { name: "Duplicate" }).click();
   await expect(page.getByLabel("Layer name")).toHaveValue("Grip details Copy");
   await page.getByRole("button", { name: "Delete active layer" }).click();
@@ -149,18 +152,8 @@ test("a visitor can paint a textured surface selection", async ({ page }) => {
   await expect(viewport).toHaveAttribute("data-preview-ready", "true", {
     timeout: 15_000,
   });
-  await page.getByRole("button", { name: "Prepare STL export" }).click();
-  const preflight = page.getByTestId("export-preflight");
-  await expect(preflight).toBeVisible({ timeout: 15_000 });
-  await expect(preflight.getByText("Finite coordinates")).toBeVisible();
-  await expect(preflight.getByText("Passed")).toBeVisible();
-  await expect(preflight.getByText("Degenerate triangles")).toBeVisible();
-  await expect(page.getByTestId("boundary-edge-count")).toHaveText("0");
-  await expect(page.getByTestId("non-manifold-edge-count")).toHaveText("0");
-  await expect(page.getByTestId("displaced-vertex-count")).not.toHaveText("0");
-  await expect(page.getByText("No geometry warnings detected.")).toBeVisible();
   const downloadPromise = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Export binary STL" }).click();
+  await page.getByRole("button", { name: "Download STL" }).click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toBe("layered-texture-sphere.stl");
   const downloadPath = await download.path();
@@ -168,7 +161,9 @@ test("a visitor can paint a textured surface selection", async ({ page }) => {
   const exportedStl = await readFile(downloadPath!);
   expect(exportedStl.readUInt32LE(80)).toBe(65_024);
   expect((exportedStl.byteLength - 84) % 50).toBe(0);
-  await expect(page.getByText(/STL exported/)).toBeVisible();
+  await expect(
+    page.getByRole("dialog", { name: "Geometry warnings" }),
+  ).toHaveCount(0);
   await page.waitForTimeout(10_000);
   await expect(canvas).not.toHaveAttribute("data-context-lost", "true");
   expect(browserIssues).toEqual([]);

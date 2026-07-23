@@ -1,83 +1,58 @@
-import { Download, ShieldCheck, X } from "lucide-react";
+import { Download, TriangleAlert, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { copy } from "../config/copy";
-import { binaryStlByteLength } from "../export/binaryStl";
-import type { ExportValidationReport } from "../export/binaryStl";
 import {
   downloadMeshExport,
-  exportVisibleLayerMesh,
+  exportLayeredMesh,
 } from "../export/workspaceExport";
-import { formatBytes } from "../utils/fileSelection";
 
-interface ExportPanelProps {
-  triangleCount: number;
-  visibleLayerCount: number;
-  units: string;
-}
-
-interface PreparedDownload {
-  buffer: ArrayBuffer;
-  filename: string;
-}
-
-export function ExportPanel({
-  triangleCount,
-  visibleLayerCount,
-  units,
-}: ExportPanelProps) {
+export function ExportPanel() {
   const controllerRef = useRef<AbortController | null>(null);
-  const preparedRef = useRef<PreparedDownload | null>(null);
-  const [report, setReport] = useState<ExportValidationReport | null>(null);
-  const [progress, setProgress] = useState(0);
+  const exportButtonRef = useRef<HTMLButtonElement>(null);
+  const [warnings, setWarnings] = useState<string[]>([]);
   const [message, setMessage] = useState<string>(copy.workspace.exportReady);
   const [error, setError] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
 
-  useEffect(
-    () => () => {
-      controllerRef.current?.abort();
-      preparedRef.current = null;
-    },
-    [],
-  );
+  useEffect(() => () => controllerRef.current?.abort(), []);
 
-  const prepareExport = (): void => {
+  useEffect(() => {
+    if (warnings.length === 0) return;
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setWarnings([]);
+        exportButtonRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [warnings]);
+
+  const closeWarnings = (): void => {
+    setWarnings([]);
+    exportButtonRef.current?.focus();
+  };
+
+  const exportMesh = (): void => {
     const controller = new AbortController();
     controllerRef.current = controller;
-    preparedRef.current = null;
-    setReport(null);
+    setWarnings([]);
     setError(null);
-    setProgress(5);
     setMessage(copy.workspace.exportPreparing);
     setIsExporting(true);
-    void exportVisibleLayerMesh({
+
+    void exportLayeredMesh({
       signal: controller.signal,
-      onProgress: (nextMessage, nextProgress) => {
-        setMessage(nextMessage);
-        setProgress(nextProgress);
-      },
+      onProgress: (nextMessage) => setMessage(nextMessage),
     })
       .then((result) => {
-        preparedRef.current = {
-          buffer: result.buffer,
-          filename: result.filename,
-        };
-        setReport({
-          triangleCount: result.triangleCount,
-          byteLength: result.byteLength,
-          boundaryEdgeCount: result.boundaryEdgeCount,
-          nonManifoldEdgeCount: result.nonManifoldEdgeCount,
-          changedVertexCount: result.changedVertexCount,
-          maximumDisplacement: result.maximumDisplacement,
-          warnings: result.warnings,
-        });
-        setProgress(100);
-        setMessage(copy.workspace.preflightComplete);
+        downloadMeshExport(result.buffer, result.filename);
+        setMessage(copy.workspace.exportComplete);
+        if (result.warnings.length > 0) setWarnings(result.warnings);
       })
       .catch((reason: unknown) => {
         if (reason instanceof DOMException && reason.name === "AbortError") {
           setMessage(copy.workspace.exportCancelled);
-          setProgress(0);
           return;
         }
         setError(
@@ -86,7 +61,6 @@ export function ExportPanel({
             : copy.workspace.exportFailed,
         );
         setMessage(copy.workspace.exportFailed);
-        setProgress(0);
       })
       .finally(() => {
         controllerRef.current = null;
@@ -94,150 +68,77 @@ export function ExportPanel({
       });
   };
 
-  const downloadPrepared = (): void => {
-    const prepared = preparedRef.current;
-    if (!prepared) return;
-    downloadMeshExport(prepared.buffer, prepared.filename);
-    setMessage(
-      `${copy.workspace.exportComplete} · ${formatBytes(prepared.buffer.byteLength)}`,
-    );
-  };
-
   return (
-    <section className="export-panel" aria-labelledby="export-heading">
-      <div className="export-panel__heading">
-        <div>
-          <small>{copy.workspace.exportKicker}</small>
-          <h3 id="export-heading">{copy.workspace.exportHeading}</h3>
-        </div>
-        <strong>STL</strong>
-      </div>
-      <dl>
-        <div>
-          <dt>{copy.workspace.exportLayers}</dt>
-          <dd>{visibleLayerCount}</dd>
-        </div>
-        <div>
-          <dt>{copy.workspace.exportTriangles}</dt>
-          <dd>{triangleCount.toLocaleString()}</dd>
-        </div>
-        <div>
-          <dt>{copy.workspace.exportEstimate}</dt>
-          <dd>{formatBytes(binaryStlByteLength(triangleCount))}</dd>
-        </div>
-      </dl>
-      <p>{copy.workspace.exportDetail}</p>
-      <p className="export-panel__units">
-        {copy.workspace.exportUnits.replace("{units}", units)}
-      </p>
-      {(isExporting || progress > 0) && (
-        <div className="export-progress" aria-live="polite">
-          <div
-            className="progress-track"
-            role="progressbar"
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={progress}
+    <>
+      <section
+        className="export-panel export-panel--compact"
+        aria-label={copy.workspace.exportHeading}
+      >
+        <button
+          ref={exportButtonRef}
+          className="button button--primary"
+          type="button"
+          disabled={isExporting}
+          onClick={exportMesh}
+        >
+          <Download size={16} aria-hidden="true" />
+          {isExporting
+            ? copy.workspace.exportingButton
+            : copy.workspace.exportButton}
+        </button>
+        <span className="visually-hidden" role="status" aria-live="polite">
+          {message}
+        </span>
+        {error && (
+          <p className="export-panel__error" role="alert">
+            {error}
+          </p>
+        )}
+      </section>
+
+      {warnings.length > 0 && (
+        <div
+          className="dialog-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) closeWarnings();
+          }}
+        >
+          <section
+            className="warning-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="export-warnings-heading"
+            aria-describedby="export-warnings-detail"
           >
-            <span style={{ width: `${progress}%` }} />
-          </div>
-          <small>{message}</small>
-        </div>
-      )}
-      {report && (
-        <div className="export-report" data-testid="export-preflight">
-          <div className="export-report__heading">
-            <ShieldCheck size={16} aria-hidden="true" />
-            <strong>{copy.workspace.preflightHeading}</strong>
-          </div>
-          <dl>
+            <button
+              className="warning-dialog__close"
+              type="button"
+              aria-label={copy.workspace.dismissExportWarnings}
+              autoFocus
+              onClick={closeWarnings}
+            >
+              <X size={17} aria-hidden="true" />
+            </button>
+            <span className="warning-dialog__icon" aria-hidden="true">
+              <TriangleAlert size={22} />
+            </span>
             <div>
-              <dt>{copy.workspace.preflightCoordinates}</dt>
-              <dd>{copy.workspace.preflightPassed}</dd>
-            </div>
-            <div>
-              <dt>{copy.workspace.preflightDegenerate}</dt>
-              <dd>0</dd>
-            </div>
-            <div>
-              <dt>{copy.workspace.preflightBoundary}</dt>
-              <dd data-testid="boundary-edge-count">
-                {report.boundaryEdgeCount.toLocaleString()}
-              </dd>
-            </div>
-            <div>
-              <dt>{copy.workspace.preflightNonManifold}</dt>
-              <dd data-testid="non-manifold-edge-count">
-                {report.nonManifoldEdgeCount.toLocaleString()}
-              </dd>
-            </div>
-            <div>
-              <dt>{copy.workspace.preflightChanged}</dt>
-              <dd data-testid="displaced-vertex-count">
-                {report.changedVertexCount.toLocaleString()}
-              </dd>
-            </div>
-            <div>
-              <dt>{copy.workspace.preflightMaximum}</dt>
-              <dd>
-                {report.maximumDisplacement.toFixed(4)} {units}
-              </dd>
-            </div>
-          </dl>
-          {report.warnings.length === 0 ? (
-            <p className="export-report__passed">
-              {copy.workspace.preflightNoWarnings}
-            </p>
-          ) : (
-            <div className="export-report__warnings">
-              <strong>{copy.workspace.preflightWarnings}</strong>
+              <h2 id="export-warnings-heading">
+                {copy.workspace.exportWarningsHeading}
+              </h2>
+              <p id="export-warnings-detail">
+                {copy.workspace.exportWarningsDetail}
+              </p>
               <ul>
-                {report.warnings.map((warning) => (
+                {warnings.map((warning) => (
                   <li key={warning}>{warning}</li>
                 ))}
               </ul>
             </div>
-          )}
+          </section>
         </div>
       )}
-      {error && (
-        <p className="export-panel__error" role="alert">
-          {error}
-        </p>
-      )}
-      <div className="export-panel__actions">
-        {!report && (
-          <button
-            className="button button--primary"
-            type="button"
-            disabled={isExporting}
-            onClick={prepareExport}
-          >
-            <ShieldCheck size={15} aria-hidden="true" />
-            {copy.workspace.prepareExport}
-          </button>
-        )}
-        {report && (
-          <button
-            className="button button--primary"
-            type="button"
-            onClick={downloadPrepared}
-          >
-            <Download size={15} aria-hidden="true" />
-            {copy.workspace.exportButton}
-          </button>
-        )}
-        {isExporting && (
-          <button
-            className="button button--quiet"
-            type="button"
-            onClick={() => controllerRef.current?.abort()}
-          >
-            <X size={15} aria-hidden="true" />
-            {copy.workspace.cancelExport}
-          </button>
-        )}
-      </div>
-    </section>
+    </>
   );
 }

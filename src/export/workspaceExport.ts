@@ -3,6 +3,7 @@ import { sourceMeshManager } from "../assets/sourceMeshManager";
 import { useWelcomeStore } from "../app/store";
 import { brand } from "../config/brand";
 import { getTextureSource } from "../textures/textureCatalog";
+import type { MaskLayerSummary } from "../types/mesh";
 import { createMeshExport, type MeshExportOptions } from "./createMeshExport";
 
 const safeFilenamePart = (value: string): string =>
@@ -17,9 +18,11 @@ export const createExportFilename = (modelName: string): string => {
   return `${safeFilenamePart(brand.exportFilenamePrefix)}-${model || "model"}.stl`;
 };
 
-export const exportVisibleLayerMesh = async (
-  options: MeshExportOptions = {},
-) => {
+export const selectLayersForExport = (
+  layers: readonly MaskLayerSummary[],
+): MaskLayerSummary[] => [...layers];
+
+export const exportLayeredMesh = async (options: MeshExportOptions = {}) => {
   const state = useWelcomeStore.getState();
   const model = state.loadedModel;
   if (!model) throw new Error("Open a model before exporting.");
@@ -30,8 +33,7 @@ export const exportVisibleLayerMesh = async (
     model.dimensions.depth,
     1,
   );
-  const visibleLayers = state.layers.filter((layer) => layer.visible);
-  const layers = visibleLayers.map((layer) => {
+  const layers = selectLayersForExport(state.layers).map((layer) => {
     const texture = getTextureSource(layer.textureId);
     if (!texture)
       throw new Error(`Texture for ${layer.name} is no longer available.`);
@@ -53,7 +55,7 @@ export const exportVisibleLayerMesh = async (
       positions: source.positions.slice(),
       normals: source.normals.slice(),
       layers,
-      header: `${brand.productName} visible-layer export`,
+      header: `${brand.productName} all-layer export`,
       sourceMaximumDimension: maximumDimension,
     },
     options,
@@ -61,7 +63,7 @@ export const exportVisibleLayerMesh = async (
   return {
     ...result,
     filename: createExportFilename(model.name),
-    visibleLayerCount: visibleLayers.length,
+    layerCount: layers.length,
   };
 };
 

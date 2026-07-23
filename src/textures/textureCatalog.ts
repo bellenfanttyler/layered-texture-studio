@@ -1,5 +1,5 @@
 import { localTextureManager } from "../assets/localTextureManager";
-import { sampleTextures } from "../config/sampleAssets";
+import { layerTextureDefaults, sampleTextures } from "../config/sampleAssets";
 
 export interface TextureSource {
   id: string;
@@ -22,8 +22,8 @@ export const getTextureSource = (id: string): TextureSource | undefined => {
     id: asset.id,
     name: asset.name,
     imageUrl: asset.objectUrl,
-    defaultScale: 1,
-    defaultAmplitude: 0.3,
+    defaultScale: layerTextureDefaults.scale,
+    defaultAmplitude: layerTextureDefaults.amplitude,
     kind: "local",
     width: asset.width,
     height: asset.height,

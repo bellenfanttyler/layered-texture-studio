@@ -21,13 +21,15 @@ Implemented so far:
 - On-surface painting with radius, hardness, strength, front-facing protection, and Alt-to-erase
 - Stroke-level undo and redo with mask deltas rather than workspace copies
 - Ordered texture layers with add, duplicate, delete, rename, reorder, and visibility controls
+- Distinct generated editing colors for added and duplicated layers
 - Active-layer painting with independently retained masks and coverage
 - Bottom-to-top Add, Subtract, and Replace layer compositing
 - Local PNG, JPEG, and WebP height-texture import with decode validation and explicit object-URL cleanup
+- Prominent local texture-upload affordance with 0.25 scale, 0.05 amplitude, 50% midpoint, and 100% influence defaults
 - Worker-generated triplanar height preview with per-layer texture, scale, midpoint, amplitude, influence, inversion, and visibility controls
-- Cancellable worker-based binary STL export of the visible-layer composite
+- One-click worker-based binary STL export that applies every layer independent of viewport visibility
 - Export validation for finite coordinates and degenerate triangles, with recalculated face normals and branded filenames
-- Preflight reporting for boundary/non-manifold edges, displaced vertices, maximum displacement, warnings, and estimated size
+- Dismissible post-download geometry warnings for boundary/non-manifold edges, unusually large displacement, and output size
 - Angle-weighted shared source normals that keep coincident STL facets aligned during displacement
 - Central brand, copy, feature, theme-token, and sample-asset configuration
 - Local-only file registry that keeps `File` objects outside component state
@@ -35,7 +37,7 @@ Implemented so far:
 - Vitest and Playwright test foundations
 - GitHub Pages build and deployment workflow
 
-Not yet implemented: OBJ/GLB import, export subdivision or adaptive remeshing, self-intersection/thickness analysis, geometry repair, or OBJ export. Project persistence is intentionally out of scope, so reloading or closing the page discards the workspace. Layer-structure and parameter changes are not yet included in undo history, and selecting another layer starts a fresh stroke-history scope. Binary STL export uses the immutable source topology, so texture detail is limited by the imported mesh's vertex density. Preflight warnings are advisory; this release does not silently repair geometry.
+Not yet implemented: OBJ/GLB import, export subdivision or adaptive remeshing, self-intersection/thickness analysis, geometry repair, or OBJ export. Project persistence is intentionally out of scope, so reloading or closing the page discards the workspace. Layer-structure and parameter changes are not yet included in undo history, and selecting another layer starts a fresh stroke-history scope. Binary STL export uses the immutable source topology, so texture detail is limited by the imported mesh's vertex density. Post-download geometry warnings are advisory; this release does not silently repair geometry.
 
 ## Requirements
 

@@ -1590,38 +1590,62 @@ main {
 }
 
 .texture-import {
-  display: flex;
+  display: grid;
+  min-height: 64px;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: var(--space-3);
   margin-top: var(--space-3);
-  padding: 0.65rem;
+  padding: var(--space-3);
   cursor: pointer;
-  border: 1px dashed var(--border-strong);
+  border: 1px solid color-mix(in srgb, var(--brand-primary) 45%, var(--border));
   border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--brand-primary) 7%, var(--panel));
   color: var(--text-secondary);
   transition:
     border-color var(--transition-fast),
-    background var(--transition-fast);
+    background var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .texture-import:hover,
 .texture-import:focus-within {
   border-color: var(--brand-primary);
-  background: var(--brand-wash);
+  background: color-mix(in srgb, var(--brand-primary) 13%, var(--panel));
+  transform: translateY(-1px);
 }
 
-.texture-import > span {
+.texture-import__icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  background: var(--brand-primary);
+  color: #0c1712;
+}
+
+.texture-import__copy {
   display: grid;
   gap: 2px;
 }
 
-.texture-import strong {
+.texture-import__copy strong {
   font-size: 0.68rem;
 }
 
-.texture-import small {
+.texture-import__copy small {
   color: var(--text-muted);
   font-size: 0.56rem;
+}
+
+.texture-import__action {
+  padding: 0.35rem 0.48rem;
+  border-radius: 4px;
+  background: var(--brand-primary);
+  color: #0c1712;
+  font-size: 0.58rem;
+  font-weight: 800;
 }
 
 .texture-import input {
@@ -1672,6 +1696,86 @@ main {
     var(--brand-accent) 4%,
     var(--workspace-raised)
   );
+}
+
+.export-panel--compact {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.export-panel--compact > .button {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.export-panel--compact > .export-panel__error {
+  margin: var(--space-2) 0 0;
+  color: var(--brand-danger);
+}
+
+.warning-dialog {
+  position: relative;
+  display: grid;
+  width: min(100%, 500px);
+  grid-template-columns: auto 1fr;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border: 1px solid color-mix(in srgb, var(--brand-warning) 45%, var(--border));
+  border-radius: var(--radius-md);
+  background: var(--panel);
+  box-shadow: var(--shadow-panel);
+}
+
+.warning-dialog__icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--brand-warning) 14%, var(--panel));
+  color: var(--brand-warning);
+}
+
+.warning-dialog__close {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  display: grid;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--workspace-raised);
+  color: var(--text-secondary);
+}
+
+.warning-dialog h2 {
+  margin: 0;
+  padding-right: var(--space-8);
+  font-size: 1rem;
+}
+
+.warning-dialog p {
+  margin: var(--space-2) 0 0;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.warning-dialog ul {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 0;
+  padding-left: var(--space-4);
+  color: var(--brand-warning);
+  font-size: 0.7rem;
+  line-height: 1.45;
 }
 
 .export-panel__heading {

@@ -497,6 +497,10 @@ Per layer:
 - Texture blur
 - Optional normal smoothing
 
+Current layer defaults are texture scale `0.25`, amplitude `0.05`, midpoint
+`0.5` (50% zero height), and influence `1` (100%). New layers receive distinct
+editing colors; layer colors must not repeat within a practical layer stack.
+
 Show a zero-height indicator on the texture histogram. Suggest a safe range based on model dimensions but allow advanced numeric entry.
 
 ---
@@ -574,7 +578,7 @@ Optional repair actions:
 - Remove isolated fragments
 - Orient faces consistently
 
-Never silently apply destructive repair. Show proposed changes and a pre-export report with passed checks, warnings, errors, triangle count, and estimated size. Permit export with noncritical warnings after acknowledgment.
+Never silently apply destructive repair. The current streamlined export downloads from one action and surfaces advisory geometry warnings in a dismissible popup only when findings are present. Future repair actions must still show proposed changes before applying them.
 
 ---
 
@@ -609,18 +613,18 @@ Project persistence, autosave, portable project files, and a local project brows
 - Final displaced mesh
 - Original mesh
 - Active layer only
-- Visible layers only
+- All layers, independent of viewport visibility
 - Mask data
 
 ### Export dialog
 
-Include filename, format, units, detail preset, triangle target, visible-layer summary, repairs, normal recalculation, weld tolerance, validation, and estimated output size.
+The current release exposes a single STL download action. Keep the worker boundary ready for future filename, format, units, detail, repair, and validation options without exposing unfinished controls.
 
 ### Export pipeline
 
 1. Reconstruct from immutable source mesh.
 2. Apply required subdivision.
-3. Evaluate visible layers in order.
+3. Evaluate all layers in order, independent of viewport visibility.
 4. Sample masks and textures.
 5. Accumulate displacement along stable source normals.
 6. Recalculate or smooth normals.
@@ -964,7 +968,7 @@ Load sample enclosure, choose hex texture, paint top region, adjust amplitude, c
 
 ### B. Multiple textures
 
-Apply leather on Layer A and diamond grip on Layer B in separate areas. Confirm simultaneous display, visibility toggles, reordering, overlap blend behavior, and visible-layer export.
+Apply leather on Layer A and diamond grip on Layer B in separate areas. Confirm simultaneous display, visibility toggles, reordering, overlap blend behavior, and that export applies both layers even when one is hidden in the viewport.
 
 ### C. Mask editing
 
@@ -976,7 +980,7 @@ Create two layers, paint both, upload a custom PNG, JPEG, or WebP texture, and c
 
 ### E. Long operation
 
-Start a high-detail export, verify responsive UI and progress, cancel it, and return to editing without reload.
+Start an export, verify the UI remains responsive, and confirm geometry warnings appear in a closable popup only when diagnostics report findings.
 
 ### F. Mesh warning
 

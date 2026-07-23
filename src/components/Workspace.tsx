@@ -355,12 +355,7 @@ export function Workspace() {
             </section>
           )}
 
-          <ExportPanel
-            key={maskRevision}
-            triangleCount={model.triangleCount}
-            visibleLayerCount={layers.filter((item) => item.visible).length}
-            units={model.units}
-          />
+          <ExportPanel key={maskRevision} />
         </aside>
 
         <div className="viewport-panel">
@@ -632,14 +627,19 @@ export function Workspace() {
                 ))}
               </div>
               <label className="texture-import">
-                <ImagePlus size={16} aria-hidden="true" />
-                <span>
+                <span className="texture-import__icon" aria-hidden="true">
+                  <ImagePlus size={18} />
+                </span>
+                <span className="texture-import__copy">
                   <strong>
                     {isImportingTexture
                       ? copy.workspace.importingTexture
                       : copy.workspace.importTexture}
                   </strong>
                   <small>{copy.workspace.importTextureHint}</small>
+                </span>
+                <span className="texture-import__action">
+                  {copy.workspace.chooseTextureFile}
                 </span>
                 <input
                   type="file"
@@ -719,6 +719,7 @@ export function Workspace() {
                   <output>{Math.round(layer.midpoint * 100)}%</output>
                 </span>
                 <input
+                  data-testid="texture-midpoint"
                   type="range"
                   min={0}
                   max={1}
@@ -735,6 +736,7 @@ export function Workspace() {
                   <output>{Math.round(layer.influence * 100)}%</output>
                 </span>
                 <input
+                  data-testid="texture-influence"
                   type="range"
                   min={0}
                   max={1}

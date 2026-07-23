@@ -1,14 +1,12 @@
 import { maskAssetManager } from "../assets/maskAssetManager";
 import { useWelcomeStore } from "../app/store";
-import { brand } from "../config/brand";
 import { copy } from "../config/copy";
-import { sampleTextures } from "../config/sampleAssets";
+import { layerTextureDefaults, sampleTextures } from "../config/sampleAssets";
 import { maskStrokeHistory } from "../history/maskStrokeHistory";
 import { getTextureSource } from "../textures/textureCatalog";
 import { releaseLayerTexture } from "../textures/textureController";
 import type { MaskLayerSummary } from "../types/mesh";
-
-const layerColors = [brand.colors.primary, brand.colors.accent];
+import { nextLayerDisplayColor } from "./layerColors";
 
 const nextLayerNumber = (layers: MaskLayerSummary[]): number => {
   const names = new Set(layers.map((layer) => layer.name));
@@ -41,14 +39,14 @@ export const addLayer = (): void => {
     name: `${copy.workspace.layerNamePrefix} ${number}`,
     maskAssetId: maskAssetManager.create(model.vertexCount),
     coverage: 0,
-    displayColor: layerColors[(number - 1) % layerColors.length]!,
+    displayColor: nextLayerDisplayColor(state.layers),
     textureId: texture.id,
     visible: true,
-    mappingScale: template?.mappingScale ?? texture.defaultScale,
-    amplitude: template?.amplitude ?? texture.defaultAmplitude,
-    midpoint: template?.midpoint ?? 0.5,
-    influence: template?.influence ?? 1,
-    invert: template?.invert ?? false,
+    mappingScale: layerTextureDefaults.scale,
+    amplitude: layerTextureDefaults.amplitude,
+    midpoint: layerTextureDefaults.midpoint,
+    influence: layerTextureDefaults.influence,
+    invert: false,
     blendMode: "add",
   };
   resetStrokeHistory();
@@ -64,6 +62,7 @@ export const duplicateActiveLayer = (): void => {
     ...active,
     id: crypto.randomUUID(),
     name: `${active.name} ${copy.workspace.layerCopySuffix}`,
+    displayColor: nextLayerDisplayColor(state.layers),
     maskAssetId: maskAssetManager.create(
       maskAssetManager.get(active.maskAssetId).weights.length,
       maskAssetManager.get(active.maskAssetId).weights,
